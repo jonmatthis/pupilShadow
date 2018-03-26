@@ -1,0 +1,1 @@
+Prop,ViewAngle,5Prop,H_Sens,3000Prop,V_Sens,3000Prop,Multiplier,3Prop,Speed,8164.97Prop,ScrollType,View angleKB,Forward,wKB,Backward,sKB,Strafe left,aKB,Strafe right,dKB,Relative up,rKB,Relative down,fKB,Vertical up,qKB,Vertical down,eKB,Walk,spaceKB,Run,shiftVarious,Last_Tab,GeneralVarious,Last_iList,1
