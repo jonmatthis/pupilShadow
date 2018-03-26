@@ -3,6 +3,8 @@ tic
 close all
 clear all
 restoredefaultpath
+cd E:\Dropbox\UTexas\pupilShadow
+addpath(genpath(cd))
 
 if ispc
     basePath = 'E:\Dropbox\UTexas\OpticFlowProject';
@@ -263,6 +265,55 @@ st(trimFirstShadowFrames|trimEndShadowFrames) = [];
 syncedUnixTime = mean([st rt]')';
 shadow_fr_mar_dim = shadowDataResamp.markerData;
 
+
+
+%% Find Steps
+for ii = 1:100000
+disp('You setting WalksFr to be full length of trial. Zeni works better if its just straightline walks');
+end
+
+
+walks = [1 length(shadow_fr_mar_dim)];
+
+            
+comXYZ = squeeze(shadow_fr_mar_dim(:,1,:));
+        w.shadow_fr_mar_dim = shadow_fr_mar_dim;
+        w.shadowMarkerNames = shadowMarkerNames;
+        w.avg_fps = mean(diff(syncedUnixTime).^-1);
+        w.walks = walks;
+        
+        [allSteps_HS_TO_StanceLeg] = ZeniStepFinder(w);
+        
+        %% build step_TO_HS_ft_XYZ variable (in the most obfuscated way humanly possible)
+        
+        rHeelXYZ = squeeze(shadow_fr_mar_dim(:,strcmp('RightHeel', shadowMarkerNames),:)); % pull out lHeel marker
+        lHeelXYZ = squeeze(shadow_fr_mar_dim(:,strcmp('LeftHeel', shadowMarkerNames),:)); % pull out lHeel marker
+
+        
+        steps_HS_TO_StanceLeg_XYZ = nan(length(allSteps_HS_TO_StanceLeg), 6);
+        
+        for i = 1:length(allSteps_HS_TO_StanceLeg)
+            if allSteps_HS_TO_StanceLeg(i,3) == 1 %Right foot is on the ground
+                steps_HS_TO_StanceLeg_XYZ(i,:) = [allSteps_HS_TO_StanceLeg(i,1) allSteps_HS_TO_StanceLeg(i,2) allSteps_HS_TO_StanceLeg(i,3) rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),1)  rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),2)  rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),3) ];
+                
+            elseif allSteps_HS_TO_StanceLeg(i,3) == 2 %Left foot is on the round
+                steps_HS_TO_StanceLeg_XYZ(i,:) = [allSteps_HS_TO_StanceLeg(i,1) allSteps_HS_TO_StanceLeg(i,2) allSteps_HS_TO_StanceLeg(i,3)  lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),1) lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),2) lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),3) ];
+            end
+            
+            if true %%debug plot, or some such
+                figure(6484)
+                if steps_HS_TO_StanceLeg_XYZ(i,3) == 1 %Right foot is on the ground
+                    plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'ro','MarkerFaceColor','r')
+                    hold on
+                elseif steps_HS_TO_StanceLeg_XYZ(i,3) == 2 %left foot is on the ground
+                    plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'bo','MarkerFaceColor','b')
+                end
+                
+            end
+        end
+        axis equal
+        hold off
+
 %% maybe later :(
 % %% Swap Y and Z dimensions in Shadow Data so that Z points up, because Z should point up, dammit!
 
@@ -441,8 +492,6 @@ end
 
 %% calibrate yr eyeballs!
 %% %%% VOR FRAME METHOD - find camera alignment (i.e. the rotations needed for to make gaze vector align with calibration points during vorFrames)
-rHeelXYZ = squeeze(shadow_fr_mar_dim(:,strcmp('RightHeel', shadowMarkerNames),:)); % pull out lHeel marker
-lHeelXYZ = squeeze(shadow_fr_mar_dim(:,strcmp('LeftHeel', shadowMarkerNames),:)); % pull out lHeel marker
 
 %right eye first
 vData.headRotMat_row_col_fr        = headRotMat_row_col_fr(:,:,vorFrames);
@@ -619,7 +668,7 @@ rArm = [15 21 22 26 22 23 24 25];
 
 comXYZ = squeeze(shadow_fr_mar_dim(:,1,:));
 
-frames = 4.951e4:10:length(comXYZ);
+frames = walks(1):10:walks(end);
 % frames = vorFrames(1):10:vorFrames(end);
 
 %build up the hypothetical groundplane
@@ -640,7 +689,7 @@ frames = 4.951e4:10:length(comXYZ);
 
 
 figure(1);clf
-set(gcf,'Position',[1921 121 1920 979])
+% set(gcf,'Position',[1921 121 1920 979])
 
 
 
@@ -667,7 +716,7 @@ for ii = frames
     lCz = lEye_sphCenCam_z(ii);
     
     
-    
+    grHeight(ii) = min([rHeelXYZ(ii,2) lHeelXYZ(ii,2) ]);
     
     % right eye
     r1 =  mesh(x1+rEx, y1+rEy, z1+rEz);
@@ -788,10 +837,16 @@ for ii = frames
         bx =   shadow_fr_mar_dim(ii,1,1);
         by =   shadow_fr_mar_dim(ii,1,2);
         bz =   shadow_fr_mar_dim(ii,1,3);
+
+        %%% plot foothold locations
+        rFootholds = steps_HS_TO_StanceLeg_XYZ(steps_HS_TO_StanceLeg_XYZ(:,3) == 1 ,:);
+        lFootholds = steps_HS_TO_StanceLeg_XYZ(steps_HS_TO_StanceLeg_XYZ(:,3) == 2 ,:);
         
-%         g_x = meshgrid(rHeelXYZ(ii,1)-4000:100:rHeelXYZ(ii,1)+4000);
-%         g_y = ones(size(g_x)) * min([rHeelXYZ(ii,2) lHeelXYZ(ii,2) ]);
-%         g_z = meshgrid(rHeelXYZ(ii,2)-4000:100:rHeelXYZ(ii,2)+4000)';
+        
+        %   plot vertical projection of foothold locations onto groundplane
+        
+        plot3(rFootholds(:,4), ones(length(rFootholds(:,1)))*grHeight(ii), rFootholds(:,6),'ko','MarkerSize', 9, 'MarkerFaceColor','r')
+        plot3(lFootholds(:,4), ones(length(lFootholds(:,1)))*grHeight(ii), lFootholds(:,6),'ko','MarkerSize', 9, 'MarkerFaceColor','c')
         
 
 %plot gaussianly burnt groundplane
@@ -808,7 +863,7 @@ end
 %         g_y = ones(size(g_x)) * min([rHeelXYZ(ii,2) lHeelXYZ(ii,2) ]);
 %         g_z = meshgrid(-10e4:500:10e4)' + comXYZ(ii,3);
  
-        s1 = surface(groundPlane_x , groundPlane_y*min([rHeelXYZ(ii,2) lHeelXYZ(ii,2) ]), groundPlane_z, groundPlane_color  );
+        s1 = surface(groundPlane_x , groundPlane_y*grHeight(ii), groundPlane_z, groundPlane_color  );
         s1.LineStyle = 'none';
         s1.FaceColor = 'interp'; 
         
