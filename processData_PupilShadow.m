@@ -3,43 +3,57 @@ tic
 close all
 clear all
 restoredefaultpath
-cd E:\Dropbox\UTexas\pupilShadow
+
+if ispc
+    repoPath = 'E:\Dropbox\UTexas\pupilShadow';
+    cd(repoPath)
+    
+elseif ismac
+    repoPath = '/Users/matthis/Dropbox/UTexas/pupilShadow';
+    cd(repoPath)
+end
+
 addpath(genpath(cd))
 
 if ispc
-    basePath = 'E:\Dropbox\UTexas\OpticFlowProject';
-    cd(basePath);
+    %     basePath = 'E:\Dropbox\UTexas\OpticFlowProject';
+%     cd(dataPath);
 elseif ismac
-    basePath = '/Users/matthis/Dropbox/UTexas/OpticFlowProject';
-    cd(basePath);
+    dataPath = '/Users/matthis/Dropbox/UTexas/KateBerkeley2018';
+    cd(dataPath);
 end
 
 %%Add the folders relevant to the experiment to the path
 addpath(genpath(cd))
-path = cd;
 
 
 %% Load the session specific details
 
 spotcheck = false;
 
-sessionID = '2018-01-23_JSM';
-% sessionID = '2018-01-26_JAC';
-% sessionID = '2018-01-31_JAW';
+sessionID = '2018-04-05-S03';
+
 
 % condID = 'Woodchips';
-condID = 'Rocks';
+condID = 'Binocular';
 
 [ sesh ] = loadSessionInfo( sessionID, condID);
 shadowTakeName = sesh.shadowTakeName;
-
+% walks = sesh.walks;
 vorFrames = sesh.vorFrames;
 calibFrame = vorFrames(1);
 
+legLength = sesh.legLength;
+bodyMass = sesh.bodyMass;
+height = sesh.height;
 
-dataPath = strcat(basePath,'/Data/',sessionID);
-shadowPath = strcat(dataPath,'/Shadow/',condID,'/');
-pupilDataPath = strcat(dataPath,'/Pupil/',condID,'/');
+for ii = 1:1990
+disp('Your bodymass, height, leglength, etc data are fake atm')
+end
+
+dataPath = strcat(dataPath,filesep,sessionID);
+shadowPath = strcat(dataPath,filesep,condID,'/Shadow/');
+pupilDataPath = strcat(dataPath,filesep, condID,'/Pupil/');
 
 
 processData_date = datetime;
@@ -132,7 +146,7 @@ streamShadow_fr_mar_dim = nan(length(streamData.data(:,1)), length(shadowMarkerN
 
 for mm = 1:length(shadowMarkerNames)
     %for each dimension (XYZ) - pull out linear translation data, and then multiply by 10 to convert cm's to mm's
-    streamShadow_fr_mar_dim(:,mm,1) = streamData.data(:, strcmp(streamData.colheaders, strcat(shadowMarkerNames(mm),'.ltx')))*10; 
+    streamShadow_fr_mar_dim(:,mm,1) = streamData.data(:, strcmp(streamData.colheaders, strcat(shadowMarkerNames(mm),'.ltx')))*10;
     streamShadow_fr_mar_dim(:,mm,2) = streamData.data(:, strcmp(streamData.colheaders, strcat(shadowMarkerNames(mm),'.lty')))*10;
     streamShadow_fr_mar_dim(:,mm,3) = streamData.data(:, strcmp(streamData.colheaders, strcat(shadowMarkerNames(mm),'.ltz')))*10;
     
@@ -227,7 +241,7 @@ for ss = 1:length(shadowVarNames)
         if numPupilFrames > length(thisShadowVar)
             thisShadowVar(end+1) = nan;
         elseif numPupilFrames < length(thisShadowVar)
-                    thisShadowVar(end) = [];
+            thisShadowVar(end) = [];
         end
         
         shadowDataResamp.(shadowVarNames{ss}) = thisShadowVar;
@@ -253,6 +267,7 @@ for mm = 1:length(squeeze(c3d_fr_mar_dimRaw(1,:,1))) % resample the marker data 
     
     c3d_fr_mar_dimTrimmed(:,mm,:) = thisMar_xyz;
 end
+
 shadowDataResamp.markerData = c3d_fr_mar_dimTrimmed;
 clear c3d_fr_mar_dimRaw c3d_fr_mar_dimTrimmed
 
@@ -262,63 +277,76 @@ rt(trimFirstPupFrames|trimEndPupFrames) = [];
 st = shadowUnixTime;
 st(trimFirstShadowFrames|trimEndShadowFrames) = [];
 
-syncedUnixTime = mean([st rt]')';
-shadow_fr_mar_dim = shadowDataResamp.markerData;
+if length(st) > length(rt)
+    syncedUnixTime = mean([st(1:length(rt)) rt]')';
+elseif length(rt) > length(st)
+    syncedUnixTime = mean([rt(1:length(st)) st]')';
+elseif length(rt) == length(st)
+    syncedUnixTime = mean([st rt]')';
+end
+
+shadowRAW_fr_mar_dim = shadowDataResamp.markerData;
+
+if length(shadowRAW_fr_mar_dim) ~= length(thisRvar)
+    disp('problem with your time sync')
+    keyboard
+end
 
 
 
 %% Find Steps
-for ii = 1:100000
-disp('You setting WalksFr to be full length of trial. Zeni works better if its just straightline walks');
-end
+
+wRaw.shadow_fr_mar_dim = shadowRAW_fr_mar_dim;
+wRaw.shadowMarkerNames = shadowMarkerNames;
+wRaw.avg_fps = mean(diff(syncedUnixTime).^-1);
+wRaw.walks = sesh.walks;
+
+[allSteps_HS_TO_StanceLeg] = ZeniStepFinder(wRaw);
 
 
-walks = [1 length(shadow_fr_mar_dim)];
+%% Try to fix 'skateboarding' problem by pinning the feet to the ground during each step
+disp('Fixing Skateboards')
+[shadow_fr_mar_dim] = fixSkateboarding(wRaw, allSteps_HS_TO_StanceLeg);
 
-            
-comXYZ = squeeze(shadow_fr_mar_dim(:,1,:));
-        w.shadow_fr_mar_dim = shadow_fr_mar_dim;
-        w.shadowMarkerNames = shadowMarkerNames;
-        w.avg_fps = mean(diff(syncedUnixTime).^-1);
-        w.walks = walks;
-        
-        [allSteps_HS_TO_StanceLeg] = ZeniStepFinder(w);
-        
-        %% build step_TO_HS_ft_XYZ variable (in the most obfuscated way humanly possible)
-        
-        rHeelXYZ = squeeze(shadow_fr_mar_dim(:,strcmp('RightHeel', shadowMarkerNames),:)); % pull out lHeel marker
-        lHeelXYZ = squeeze(shadow_fr_mar_dim(:,strcmp('LeftHeel', shadowMarkerNames),:)); % pull out lHeel marker
 
+%% build step_TO_HS_ft_XYZ variable (in the most obfuscated way humanly possible)
+
+rHeelXYZ = squeeze(shadow_fr_mar_dim(:,strcmp('RightHeel', shadowMarkerNames),:)); % pull out lHeel marker
+lHeelXYZ = squeeze(shadow_fr_mar_dim(:,strcmp('LeftHeel', shadowMarkerNames),:)); % pull out lHeel marker
+
+
+steps_HS_TO_StanceLeg_XYZ = nan(length(allSteps_HS_TO_StanceLeg), 6);
+
+for i = 1:length(allSteps_HS_TO_StanceLeg)
+    if allSteps_HS_TO_StanceLeg(i,3) == 1 %Right foot is on the ground
+        steps_HS_TO_StanceLeg_XYZ(i,:) = [allSteps_HS_TO_StanceLeg(i,1) allSteps_HS_TO_StanceLeg(i,2) allSteps_HS_TO_StanceLeg(i,3) rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),1)  rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),2)  rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),3) ];
         
-        steps_HS_TO_StanceLeg_XYZ = nan(length(allSteps_HS_TO_StanceLeg), 6);
-        
-        for i = 1:length(allSteps_HS_TO_StanceLeg)
-            if allSteps_HS_TO_StanceLeg(i,3) == 1 %Right foot is on the ground
-                steps_HS_TO_StanceLeg_XYZ(i,:) = [allSteps_HS_TO_StanceLeg(i,1) allSteps_HS_TO_StanceLeg(i,2) allSteps_HS_TO_StanceLeg(i,3) rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),1)  rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),2)  rHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),3) ];
-                
-            elseif allSteps_HS_TO_StanceLeg(i,3) == 2 %Left foot is on the round
-                steps_HS_TO_StanceLeg_XYZ(i,:) = [allSteps_HS_TO_StanceLeg(i,1) allSteps_HS_TO_StanceLeg(i,2) allSteps_HS_TO_StanceLeg(i,3)  lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),1) lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),2) lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),3) ];
-            end
-            
-            if true %%debug plot, or some such
-                figure(6484)
-                if steps_HS_TO_StanceLeg_XYZ(i,3) == 1 %Right foot is on the ground
-                    plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'ro','MarkerFaceColor','r')
-                    hold on
-                elseif steps_HS_TO_StanceLeg_XYZ(i,3) == 2 %left foot is on the ground
-                    plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'bo','MarkerFaceColor','b')
-                end
-                
-            end
+    elseif allSteps_HS_TO_StanceLeg(i,3) == 2 %Left foot is on the round
+        steps_HS_TO_StanceLeg_XYZ(i,:) = [allSteps_HS_TO_StanceLeg(i,1) allSteps_HS_TO_StanceLeg(i,2) allSteps_HS_TO_StanceLeg(i,3)  lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),1) lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),2) lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),3) ];
+    end
+    
+    if true %%debug plot, or some such
+        figure(6484)
+        if steps_HS_TO_StanceLeg_XYZ(i,3) == 1 %Right foot is on the ground
+            plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'ro','MarkerFaceColor','r')
+            hold on
+        elseif steps_HS_TO_StanceLeg_XYZ(i,3) == 2 %left foot is on the ground
+            plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'bo','MarkerFaceColor','b')
         end
-        axis equal
-        hold off
+        
+    end
+end
+axis equal
+hold off
+
+
+
 
 %% maybe later :(
 % %% Swap Y and Z dimensions in Shadow Data so that Z points up, because Z should point up, dammit!
 
 % for mm = 1:length(shadow_fr_mar_dim(1,:,1))
-%     
+%
 %     thisMar =  squeeze(shadow_fr_mar_dim(:,mm,:));
 %     shadow_fr_mar_dim(:,mm,2) = -thisMar(:,3); %replace current Y(vertical) data with Z(leftward) data (Y = -Z, because rotation, I guess)
 %     shadow_fr_mar_dim(:,mm,3) = thisMar(:,2); %replace current Z(leftward) data with Y(verical) data
@@ -412,18 +440,18 @@ headVecX_fr_xyz = nan(length(headRotMat_row_col_fr),3);
 headVecY_fr_xyz = nan(length(headRotMat_row_col_fr),3);
 headVecZ_fr_xyz = nan(length(headRotMat_row_col_fr),3);
 
-    for mm = 1:length(headRotMat_row_col_fr)
-%         if mod(mm,1000) == 0 ; disp(strcat({'Rotating Head Unit vectors: '},num2str(mm),{' of '}, num2str(length(headRotMat_row_col_fr)))); end
-        headVecX_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [.5e3; 0; 0]; %rotate a unit vector to point in the same direction as the head (or something like that)
-        headVecY_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; .5e3; 0];
-        headVecZ_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; 0; .5e3];
-    end
+for mm = 1:length(headRotMat_row_col_fr)
+    %         if mod(mm,1000) == 0 ; disp(strcat({'Rotating Head Unit vectors: '},num2str(mm),{' of '}, num2str(length(headRotMat_row_col_fr)))); end
+    headVecX_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [.5e3; 0; 0]; %rotate a unit vector to point in the same direction as the head (or something like that)
+    headVecY_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; .5e3; 0];
+    headVecZ_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; 0; .5e3];
+end
 
-    
-    
-    
-    
-    
+
+
+
+
+
 plotHead = false;
 sphRes = 30;
 r = 50;
@@ -625,7 +653,7 @@ for rr = 1:length(lGazeXYZ)
     thisET_frame_unrot = lEyeAlignRotMat * [lGazeXYZ(rr,1); lGazeXYZ(rr,2); lGazeXYZ(rr,3)];
     thisETframe = headRotMat_row_col_fr(:,:,rr) * thisET_frame_unrot;
     
-   
+    
     lGazeXYZ(rr,:) = thisETframe;
     
 end
@@ -650,6 +678,42 @@ disp('calckin up some lGazeGroundIntersections')
 
 
 
+% %% correct for misalignment between root marker and sub's spine, basically find a rotation that makes gaze be more or less equally distributed around the subject's walking path
+% disp('calcking alignment error')
+%     
+%     
+%     thisWalk.rGazeXYZ = rGazeXYZ;
+%     thisWalk.lGazeXYZ = lGazeXYZ;
+%     
+%     thisWalk.rEyeballCenterXYZ = rEyeballCenterXYZ;
+%     thisWalk.lEyeballCenterXYZ = lEyeballCenterXYZ;
+%     
+%     thisWalk.shadow_fr_mar_dim = shadow_fr_mar_dim;
+%     thisWalk.shadowMarkerNames = shadowMarkerNames;
+%         
+%     thisWalk.walks = sesh.walks;
+%     
+%     [thisWalk_fix] = correctAlignmentError_opt(thisWalk);
+% 
+%     
+%     %%%%replace relevant variables with fixed (i.e. correctively rotated)
+%     %%%%variables
+%     shadow_fr_mar_dim = thisWalk_fix.shadow_fr_mar_dim;
+%     rGazeXYZ = thisWalk_fix.rGazeXYZ;
+%     lGazeXYZ = thisWalk_fix.lGazeXYZ;
+%     
+%     rEyeballCenterXYZ = thisWalk_fix.rEyeballCenterXYZ;
+%     lEyeballCenterXYZ = thisWalk_fix.lEyeballCenterXYZ;
+% 
+%     rCorrAlignTheta = thisWalk_fix.rCorrAlignTheta;
+%     lCorrAlignTheta = thisWalk_fix.lCorrAlignTheta;
+%     
+%% Save out all the variables
+cd(dataPath)
+cd(condID)
+cd('OutputFiles')
+save(strcat(condID,'.mat'))
+
 
 %% %%% make sphere thingy fr eyeball guys
 sphRes = 20;
@@ -668,27 +732,27 @@ rArm = [15 21 22 26 22 23 24 25];
 
 comXYZ = squeeze(shadow_fr_mar_dim(:,1,:));
 
-frames = walks(1):10:walks(end);
+frames = sesh.walks(6,1):10:sesh.walks(7,2);
 % frames = vorFrames(1):10:vorFrames(end);
-
+cd
 %build up the hypothetical groundplane
-    % plot (hypothetical) groundplane
-    
-    xSpan = [min(rGazeGroundIntersection(frames,1))-5000, max(rGazeGroundIntersection(frames,1))+5000];
-    zSpan = [min(rGazeGroundIntersection(frames,3))-5000, max(rGazeGroundIntersection(frames,3))+5000];
-    
-    
-    res      = 100; % resultion for the meshgrid
-    [groundPlane_x, groundPlane_z] = meshgrid(xSpan(1):res:xSpan(2), zSpan(1):res:zSpan(2));
-    
-    
-    groundPlane_y = ones(size(groundPlane_x));
-    groundPlane_color = ones(size(groundPlane_x));
-    
+% plot (hypothetical) groundplane
+
+xSpan = [min(rGazeGroundIntersection(frames,1))-5000, max(rGazeGroundIntersection(frames,1))+5000];
+zSpan = [min(rGazeGroundIntersection(frames,3))-5000, max(rGazeGroundIntersection(frames,3))+5000];
+
+
+res      = 100; % resultion for the meshgrid
+[groundPlane_x, groundPlane_z] = meshgrid(xSpan(1):res:xSpan(2), zSpan(1):res:zSpan(2));
+
+
+groundPlane_y = ones(size(groundPlane_x));
+groundPlane_color = ones(size(groundPlane_x));
 
 
 
-figure(1);clf
+
+figure(1254);clf
 % set(gcf,'Position',[1921 121 1920 979])
 
 
@@ -837,7 +901,7 @@ for ii = frames
         bx =   shadow_fr_mar_dim(ii,1,1);
         by =   shadow_fr_mar_dim(ii,1,2);
         bz =   shadow_fr_mar_dim(ii,1,3);
-
+        
         %%% plot foothold locations
         rFootholds = steps_HS_TO_StanceLeg_XYZ(steps_HS_TO_StanceLeg_XYZ(:,3) == 1 ,:);
         lFootholds = steps_HS_TO_StanceLeg_XYZ(steps_HS_TO_StanceLeg_XYZ(:,3) == 2 ,:);
@@ -848,28 +912,29 @@ for ii = frames
         plot3(rFootholds(:,4), ones(length(rFootholds(:,1)))*grHeight(ii), rFootholds(:,6),'ko','MarkerSize', 9, 'MarkerFaceColor','r')
         plot3(lFootholds(:,4), ones(length(lFootholds(:,1)))*grHeight(ii), lFootholds(:,6),'ko','MarkerSize', 9, 'MarkerFaceColor','c')
         
-
-%plot gaussianly burnt groundplane
-sigma = 7500;
-meanGazeGround = mean([lGazeGroundIntersection(ii,:); rGazeGroundIntersection(ii,:)]);
-gaussian        = 1./sqrt(2*pi*sigma).*exp(-1./(2*sigma).*( (groundPlane_z-meanGazeGround(3)).^2 + (groundPlane_x-meanGazeGround(1)).^2));
-gaussianNorm    = gaussian ./ max(max(gaussian));
-
-if ~isnan(gaussianNorm)
-    groundPlane_color = groundPlane_color + gaussianNorm; %add 2d gaussian for this frame's gaze/ground intersection ground plane
-end
-
-%         g_x = meshgrid(-10e4:500:10e4) + comXYZ(ii,1);
-%         g_y = ones(size(g_x)) * min([rHeelXYZ(ii,2) lHeelXYZ(ii,2) ]);
-%         g_z = meshgrid(-10e4:500:10e4)' + comXYZ(ii,3);
- 
+        
+        %plot gaussianly burnt groundplane
+        sigma = 7500;
+        meanGazeGround = mean([lGazeGroundIntersection(ii,:); rGazeGroundIntersection(ii,:)]);
+        gaussian        = 1./sqrt(2*pi*sigma).*exp(-1./(2*sigma).*( (groundPlane_z-meanGazeGround(3)).^2 + (groundPlane_x-meanGazeGround(1)).^2));
+        gaussianNorm    = gaussian ./ max(max(gaussian));
+        
+        if ~isnan(gaussianNorm)
+            groundPlane_color = groundPlane_color + gaussianNorm; %add 2d gaussian for this frame's gaze/ground intersection ground plane
+        end
+        
+        %         g_x = meshgrid(-10e4:500:10e4) + comXYZ(ii,1);
+        %         g_y = ones(size(g_x)) * min([rHeelXYZ(ii,2) lHeelXYZ(ii,2) ]);
+        %         g_z = meshgrid(-10e4:500:10e4)' + comXYZ(ii,3);
+        
         s1 = surface(groundPlane_x , groundPlane_y*grHeight(ii), groundPlane_z, groundPlane_color  );
         s1.LineStyle = 'none';
-        s1.FaceColor = 'interp'; 
+        s1.FaceColor = 'interp';
         
 %         CT = cbrewer('div', 'Spectral', 64);
 %         colormap(flipud(CT));
-        caxis([0 10])
+colormap jet
+caxis([0 5])
         
     end
     %     view(-173, -43);
@@ -877,7 +942,7 @@ end
     title(num2str(ii))
     %     set(gca,'CameraUpVector',[0 1 0])
     xlabel('x');ylabel('y'); zlabel('z');
-%     axis([-5000+bx 5000+bx -5000+by 5000+by -5000+bz 5000+bz])
+    %     axis([-5000+bx 5000+bx -5000+by 5000+by -5000+bz 5000+bz])
     
     a = gca;
     a.CameraTarget = [comXYZ(ii,1), comXYZ(ii,2), comXYZ(ii,3)]; %point figure 'camera' at COM

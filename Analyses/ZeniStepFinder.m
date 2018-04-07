@@ -47,7 +47,7 @@ lAnkY_noZ = squeeze(c3dData(:,lFootID,2)); % pull out lFootID marker as Y vector
 lAnkZ_noZ = squeeze(c3dData(:,lFootID,3)); % pull out lFootID marker as Z vector
 
 %define root as 'Body'
-BodyID = find(strcmp('Body',shadowMarkerNames)); %find body marker
+BodyID = find(strcmp('Hips',shadowMarkerNames)); %find body marker
 root = squeeze(c3dData(:,BodyID,:));
 
 
@@ -64,6 +64,45 @@ for f = 1:numel(c3dData(:,1,1)) %f = Frame
 end
 
 
+rThighXZ = squeeze(c3dData(:,strcmp('RightThigh', shadowMarkerNames), [1 3])); % pull out lFootID marker as X vector
+
+[rThighTheta, rThighRho] = cart2pol(rThighXZ(:,1), rThighXZ(:,2));
+
+for f = 1:numel(c3dData(:,1,1)) %f = Frame
+    for m = 1:numel(c3dData(1,:,1)) %m = Marker
+        
+        X = c3dData(f,m,1);
+        Z = c3dData(f,m,3);
+        
+        %         x_r = c3dData(f,m,1)* cos(-rThighTheta(f))- ...
+        %             c3dData(f,m,3)* sin(-rThighTheta(f));
+        %
+        %         z_r = c3dData(f,m,1)* sin(-rThighTheta(f))+...
+        %             c3dData(f,m,3)* cos(-rThighTheta(f));
+        %
+        
+        x_r = ...
+            X * cos(rThighTheta(f))+... %x*cos(theta)
+            Z * sin(rThighTheta(f));    %y*sin(theta)
+        
+        
+        z_r = ...
+            -X * sin(rThighTheta(f))+... %x*cos(theta)
+            Z * cos(rThighTheta(f));    %y*sin(theta)
+        
+        
+        c3dData(f,m,1) = x_r;
+        c3dData(f,m,3) = z_r;
+        
+    end
+end
+
+
+rThighXZrot = squeeze(c3dData(:,strcmp('RightThigh', shadowMarkerNames), [1 3])); % pull out lFootID marker as X vector
+
+
+
+
 rAnkX = squeeze(c3dData(:,rFootID,1)); % pull out rFootID marker as X vector
 rAnkY = squeeze(c3dData(:,rFootID,2)); % pull out rFootID marker as Y vector
 rAnkZ = squeeze(c3dData(:,rFootID,3)); % pull out rFootID marker as Z vector
@@ -75,37 +114,39 @@ lAnkZ = squeeze(c3dData(:,lFootID,3)); % pull out lFootID marker as Z vector
 
 walkDir = zeros(length(root),1);
 for ww = 1:size(walks,1)
-    
-    if mean(sum(diff(root(walks(ww,1):walks(ww,2),[1 3])),2)) > 0 %if mean Root Vel in this walk is positive, walkDir is positive
-        dir = 1;
-    elseif mean(sum(diff(root(walks(ww,1):walks(ww,2),[1 3])),2)) < 0 %if mean Root Vel in this walk is positive, walkDir is positive
-        dir = -1;
-    end
+    %
+    %     if mean(sum(diff(root(walks(ww,1):walks(ww,2),[1 3])),2)) > 0 %if mean Root Vel in this walk is positive, walkDir is positive
+    %         dir = 1;
+    %     elseif mean(sum(diff(root(walks(ww,1):walks(ww,2),[1 3])),2)) < 0 %if mean Root Vel in this walk is positive, walkDir is positive
+    %         dir = -1;
+    %     end
+    %
+    dir = -1; %I think this is all you need now that I'm doing the thigh rotation thing, but based on my experience, there is an equal or greater chance that I am just fucking everything up :D
     
     walkDir(walks(ww,1):walks(ww,2)) = dir;
 end
 
-% 
+%
 % %find frames wherein subject is moving
 % rootVel = diff(root(:,1))*mean(avg_fps)/1000 + diff(root(:,3))*mean(avg_fps)/1000;
-% 
+%
 % order = 4;
 % cutoff = .3;
-% 
+%
 % posRootVel = butterLowZero(order,cutoff,mean(avg_fps),rootVel);
 % posRootVel(posRootVel<0) = nan;
-% 
+%
 % negRootVel = butterLowZero(order,cutoff,mean(avg_fps),rootVel);
 % negRootVel(negRootVel>0) = nan;
-% 
-% 
-% 
+%
+%
+%
 % thresh = .3;
 % moving = posRootVel>thresh | -negRootVel>thresh;
-% 
+%
 % walkDir = +(posRootVel>=0 | -negRootVel>0); %convert logical to double
 % walkDir(rootVel<0) = -1; %tag walking direction with  a 1 or a -1
-% 
+%
 % walkDir = walkDir .* moving;
 
 %% Right and Left Ankle markers
@@ -138,38 +179,38 @@ lAnkVel_noZ = lAnkVel_noZ .* walkDir; %flip ankVel when sub is walking in "negat
 
 
 
-% % % 
+% % %
 % % % %%correct for weird patches where "correctGroundSlip did its thing by linearly interpolating sectoins where Ankel Acceleration == 0. That's
 % % % %%right, I'm correcting for the correction, cuz that's how I roll :-/
-% % % 
+% % %
 % % % rAnkAcc = [0; diff(rAnkVel)];
 % % % lAnkAcc = [0; diff(lAnkVel)];
-% % % 
+% % %
 % % % rAnkAcc(abs(rAnkAcc) < 1e-10) = 0;
 % % % lAnkAcc(abs(lAnkAcc) < 1e-10) = 0;
-% % % 
+% % %
 % % % rAnkAcc(~moving) = nan;
 % % % lAnkAcc(~moving) = nan;
-% % % 
+% % %
 % % % wonkyFrames = lAnkAcc==0;
-% % %  
+% % %
 % % % wonkyFrameStarts  = find( diff([0; wonkyFrames]) == 1)-2;
 % % % wonkyFrameEnds  = find( diff([0; wonkyFrames]) == -1)+2;
-% % % 
+% % %
 % % % % %%debug plot
 % % % % plot(rAnkVel,'ro-')
-% % % % hold on 
+% % % % hold on
 % % % % plot(lAnkVel,'bo-')
-% % % 
-% % % for ff = 1:length(wonkyFrameStarts) % replace wonky frames with linearly interpolated velocity 
-% % %     
+% % %
+% % % for ff = 1:length(wonkyFrameStarts) % replace wonky frames with linearly interpolated velocity
+% % %
 % % %     rAnkVel(wonkyFrameStarts(ff):wonkyFrameEnds(ff)) = linspace(rAnkVel(wonkyFrameStarts(ff)), rAnkVel(wonkyFrameEnds(ff)), length(wonkyFrameStarts(ff):wonkyFrameEnds(ff)));
-% % %     
+% % %
 % % %     lAnkVel(wonkyFrameStarts(ff):wonkyFrameEnds(ff)) = linspace(lAnkVel(wonkyFrameStarts(ff)), lAnkVel(wonkyFrameEnds(ff)), length(wonkyFrameStarts(ff):wonkyFrameEnds(ff)));
 % % % end
-% % % 
+% % %
 % % % % plot(rAnkVel,'r.-')
-% % % % hold on 
+% % % % hold on
 % % % % plot(lAnkVel,'b.-')
 % % % % hold off
 
@@ -180,31 +221,31 @@ lAnkVel_noZ = lAnkVel_noZ .* walkDir; %flip ankVel when sub is walking in "negat
 % thresh = .1;
 % startFrame = 0;
 % endFrame = 0;
-% 
+%
 % for ii = 1:length(posRootVel)
-%     
+%
 %     if(posRootVel(ii))>thresh & startFrame ==0
-%         startFrame = ii;  
+%         startFrame = ii;
 %         ii = ii + 200;
 %     end
-%     
+%
 %     if(posRootVel(ii))<thresh & startFrame > 0 & endFrame == 0
 %         endFrame = ii;
 %         break
 %     end
-%     
+%
 % end
-% 
+%
 % if endFrame == 0
 %     endFrame = length(posRootVel);
 % end
-% 
+%
 % % %%% Debug Plot
 % figure;clf;
 % plot(posRootVel)
-% hold on 
+% hold on
 % plot([startFrame endFrame], posRootVel([startFrame endFrame]), 'o')
-% 
+%
 startFrame = 1;
 endFrame = length(root);
 
@@ -294,7 +335,7 @@ grid on
 
 
 
-%% Clean up 
+%% Clean up
 
 %%% start with (temporally) linear sequence of all gait events, tagged with
 %%% foot (R = 1, L = 2) and type (Toe off = 3, Heel strike = 4)
@@ -335,7 +376,7 @@ while allGaitEvents(1,3) == 4 %it's easier if we start with a toe off
     allGaitEvents(1,:) = [];
 end
 
-allGaitEventsRaw = allGaitEvents; 
+allGaitEventsRaw = allGaitEvents;
 
 iter = 0;
 suspect = zeros(length(allGaitEvents),1);
@@ -350,17 +391,17 @@ while sum(suspect)>0 || iter == 0
         %% Sequence should be ...TO(L)-HS(L)-TO(R)-HS(R)-TO(R)-HS(L)-TO(L)....
         
         %If this event is  TO, AND the next event is EITHER not a HS, OR not on the same leg (P & (Q or R)).... SUSPECT!!
-        if allGaitEvents(ee,3) ==3 &&  (allGaitEvents(ee+1,3) ~= 4 || allGaitEvents(ee,2) ~= allGaitEvents(ee+1,2)) 
+        if allGaitEvents(ee,3) ==3 &&  (allGaitEvents(ee+1,3) ~= 4 || allGaitEvents(ee,2) ~= allGaitEvents(ee+1,2))
             suspect(ee+1) = 1;
         end
         
         
-        if allGaitEvents(ee,3) ==4 && (allGaitEvents(ee+1,3) ~= 3 || allGaitEvents(ee,2) == allGaitEvents(ee+1,2)) 
+        if allGaitEvents(ee,3) ==4 && (allGaitEvents(ee+1,3) ~= 3 || allGaitEvents(ee,2) == allGaitEvents(ee+1,2))
             suspect(ee+1) = 1;
         end
     end
     allGaitEvents(logical(suspect),:) = [];
-
+    
 end
 
 %% Debug plot
@@ -382,55 +423,55 @@ grid on
 
 
 %% build output variable(s)
-% 
+%
 % %% build "allStancePhases"
 % rAllEvents = allGaitEvents(allGaitEvents(:,2)==1, :);
 % lAllEvents = allGaitEvents(allGaitEvents(:,2)==2, :);
-% 
+%
 % if ~( sum(diff(rAllEvents(:,3))==0) == 0) || ~( sum(diff(lAllEvents(:,3))==0) == 0)  %if there are any TO-TO or HS-HS's in either variable, stop
 %     disp('Problem in Zeni')
 %     dbstack
 %     keyboard
 % end
-% 
+%
 % while rAllEvents(1,3) ~=4; %make sure the first entry is a HS
 %     rAllEvents(1,:) = [];
 % end
-% 
-% 
+%
+%
 % while rAllEvents(end,3) ~=3; %make sure the first entry is a TO
 %     rAllEvents(end,:) = [];
 % end
-%     
-% 
+%
+%
 % while lAllEvents(1,3) ~=4; %make sure the first entry is a HS
 %     lAllEvents(1,:) = [];
 % end
-% 
-% 
+%
+%
 % while lAllEvents(end,3) ~=3; %make sure the first entry is a TO
 %     lAllEvents(end,:) = [];
 % end
-% 
+%
 % rHSTO(:,1) = rAllEvents(rAllEvents(:,3)==4); %r HS's
 % rHSTO(:,2) = rAllEvents(rAllEvents(:,3)==3); %r TO's
 % rHSTO(:,3) = ones(length(rHSTO),1)*1; %tag right leg events with a '1'
-% 
-% 
+%
+%
 % lHSTO(:,1) = lAllEvents(rAllEvents(:,3)==4); %lHS's
 % lHSTO(:,2) = lAllEvents(rAllEvents(:,3)==3); %lTO's
 % lHSTO(:,3) = ones(length(lHSTO),1)*2; %tag left leg events with a '3'
-% 
-% 
+%
+%
 % allStancePhases = sortrows([rHSTO; lHSTO]);
-% 
+%
 % %delete steps that are longer than 1.5 seconds
-% 
+%
 % stanceDur = allStancePhases(:,2) - allStancePhases(:,1);
 % maxStanceDur = round(1.5/(1/avg_fps)); %1.5s = 150frames @~100fps
-% 
+%
 % allStancePhases(stanceDur > maxStanceDur, :) = [];
-% 
+%
 
 %% build allSteps
 ss= 0;
@@ -455,8 +496,8 @@ while ss < length(allGaitEvents)-1
             dbstack
             keyboard
         end
-       
-            
+        
+        
         ss = ss+1;
     end
     
@@ -490,7 +531,7 @@ end
 figure(3432432)
 title('Step Durations')
 plot(diff(allSteps_HS_TO_StanceLeg(:,1)),'-p');
-hold on 
+hold on
 plot(ssp,'-v')
 plot(diff(allSteps_HS_TO_StanceLeg(:,[1 2]),1,2),'-o')
 plot(allSteps_HS_TO_StanceLeg(:,3),'-s')
@@ -508,25 +549,25 @@ hold off
 % %% Debug plot
 % rTO_1 =  allStancePhases( [ allStancePhases(:,3) == 1],2);
 % rHS_1 =  allStancePhases( [ allStancePhases(:,3) == 1],1);
-% 
+%
 % lTO_1 =  allStancePhases( [ allStancePhases(:,3) == 2],2);
 % lHS_1 =  allStancePhases( [ allStancePhases(:,3) == 2],1);
-% 
-% 
+%
+%
 % figure(432421)
-% 
+%
 % plot(rTO_1(:,1),0,'ro','MarkerFaceColor','r','MarkerSize',4)
 % plot(rHS_1(:,1),0,'ro','MarkerFaceColor','r','MarkerSize',4)
 % grid on
-% 
+%
 % plot(lTO_1(:,1),0,'ro','MarkerFaceColor','r','MarkerSize',4)
 % plot(lHS_1(:,1),0,'ro','MarkerFaceColor','r','MarkerSize',4)
 % grid on
-% 
+%
 
 % %%
-% 
-% 
+%
+%
 % %Uncomment for Debug Plots
 % figure(43242)
 % subplot(2,1,1)
@@ -535,7 +576,7 @@ hold off
 % plot(allStancePhases(allStancePhases(:,3) == 1, 2),0,'ro','MarkerFaceColor','k','MarkerSize',8)
 % plot(allStancePhases(allStancePhases(:,3) == 1, 1),0,'rp','MarkerFaceColor','k','MarkerSize',8)
 % grid on
-% 
+%
 % subplot(212)
 % plot(lAnkVel, 'b-o','MarkerSize',2)
 % hold on
