@@ -157,14 +157,15 @@ cutoff = 3;
 
 rAnkVelX = [0; diff(rAnkX)];
 rAnkVelZ = [0; diff(rAnkZ)];
-rAnkVel = plus(rAnkVelX, rAnkVelZ)*mean(avg_fps)/1000;
+rAnkVel =  rAnkVelZ*mean(avg_fps)/1000; %now that I'm rotating the data, all the action should be happening in the Z direction. <<-Hey, FutureJon. Nice to see you. The problem is probably here <<--
+% rAnkVel = plus(rAnkVelX, rAnkVelZ)*mean(avg_fps)/1000; <<-- this is what it used to look like ^^
 rAnkVelRaw = rAnkVel.* walkDir;
 rAnkVel = butterLowZero(order, cutoff, mean(avg_fps), rAnkVel);
 rAnkVel = rAnkVel .* walkDir; %flip ankVel when sub is walking in "negative" direction. Also zero out non-moving frames
 
 lAnkVelX = [0; diff(lAnkX)];
 lAnkVelZ = [0; diff(lAnkZ)];
-lAnkVel = plus(lAnkVelX, lAnkVelZ)*mean(avg_fps)/1000;
+lAnkVel = lAnkVelZ*mean(avg_fps)/1000;
 lAnkVelRaw = lAnkVel.* walkDir;
 lAnkVel = butterLowZero(order, cutoff, mean(avg_fps), lAnkVel);
 lAnkVel = lAnkVel .* walkDir; %flip ankVel when sub is walking in "negative" direction. Also zero out non-moving frames

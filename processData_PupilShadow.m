@@ -16,11 +16,12 @@ end
 addpath(genpath(cd))
 
 if ispc
-    %     basePath = 'E:\Dropbox\UTexas\OpticFlowProject';
-%     cd(dataPath);
-elseif ismac
-    dataPath = '/Users/matthis/Dropbox/UTexas/KateBerkeley2018';
+%         dataPath = 'E:\Dropbox\UTexas\OpticFlowProject';
+    dataPath = 'E:/Dropbox/UTexas/KateBerkeley2018';
     cd(dataPath);
+elseif ismac
+%     dataPath = '/Users/matthis/Dropbox/UTexas/OpticFlowProject';
+cd(dataPath);
 end
 
 %%Add the folders relevant to the experiment to the path
@@ -32,14 +33,14 @@ addpath(genpath(cd))
 spotcheck = false;
 
 sessionID = '2018-04-05-S03';
-
+% sessionID = '2018-01-23_JSM';
 
 % condID = 'Woodchips';
 condID = 'Binocular';
 
 [ sesh ] = loadSessionInfo( sessionID, condID);
 shadowTakeName = sesh.shadowTakeName;
-% walks = sesh.walks;
+walks = sesh.walks;
 vorFrames = sesh.vorFrames;
 calibFrame = vorFrames(1);
 
@@ -47,14 +48,12 @@ legLength = sesh.legLength;
 bodyMass = sesh.bodyMass;
 height = sesh.height;
 
-for ii = 1:1990
-disp('Your bodymass, height, leglength, etc data are fake atm')
-end
-
-dataPath = strcat(dataPath,filesep,sessionID);
-shadowPath = strcat(dataPath,filesep,condID,'/Shadow/');
+% subPath = strcat(dataPath,filesep,'Data',filesep, sessionID);
+% shadowDataPath = strcat(dataPath,filesep,'Data',filesep, sessionID,filesep,condID,filesep,'Shadow',filesep);
+% pupilDataPath = strcat(dataPath,filesep,'Data',filesep,sessionID,filesep,condID,filesep,'Pupil',filesep);
+subPath = strcat(dataPath,filesep,sessionID);
+shadowDataPath = strcat(dataPath,filesep,condID,'/Shadow/');
 pupilDataPath = strcat(dataPath,filesep, condID,'/Pupil/');
-
 
 processData_date = datetime;
 
@@ -110,7 +109,7 @@ pupUnixTime = rEye.unixTimestamp;
 
 %% Load Shadow Data
 
-cd(shadowPath)
+cd(shadowDataPath)
 
 streamFilename = strcat(shadowTakeName, '_stream.csv');
 headerline = 1;
@@ -306,8 +305,7 @@ wRaw.walks = sesh.walks;
 
 %% Try to fix 'skateboarding' problem by pinning the feet to the ground during each step
 disp('Fixing Skateboards')
-[shadow_fr_mar_dim] = fixSkateboarding(wRaw, allSteps_HS_TO_StanceLeg);
-
+[shadow_fr_mar_dim] = fixSkateboarding_kb(wRaw, allSteps_HS_TO_StanceLeg);
 
 %% build step_TO_HS_ft_XYZ variable (in the most obfuscated way humanly possible)
 
@@ -325,16 +323,18 @@ for i = 1:length(allSteps_HS_TO_StanceLeg)
         steps_HS_TO_StanceLeg_XYZ(i,:) = [allSteps_HS_TO_StanceLeg(i,1) allSteps_HS_TO_StanceLeg(i,2) allSteps_HS_TO_StanceLeg(i,3)  lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),1) lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),2) lHeelXYZ(allSteps_HS_TO_StanceLeg(i,1),3) ];
     end
     
-    if true %%debug plot, or some such
-        figure(6484)
-        if steps_HS_TO_StanceLeg_XYZ(i,3) == 1 %Right foot is on the ground
-            plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'ro','MarkerFaceColor','r')
-            hold on
-        elseif steps_HS_TO_StanceLeg_XYZ(i,3) == 2 %left foot is on the ground
-            plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'bo','MarkerFaceColor','b')
-        end
-        
+
+end
+
+if true %%debug plot of sorts
+    figure(6484)
+    if steps_HS_TO_StanceLeg_XYZ(i,3) == 1 %Right foot is on the ground
+        plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'ro','MarkerFaceColor','r')
+        hold on
+    elseif steps_HS_TO_StanceLeg_XYZ(i,3) == 2 %left foot is on the ground
+        plot(steps_HS_TO_StanceLeg_XYZ(i,4), steps_HS_TO_StanceLeg_XYZ(i,6), 'bo','MarkerFaceColor','b')
     end
+    
 end
 axis equal
 hold off
@@ -442,9 +442,9 @@ headVecZ_fr_xyz = nan(length(headRotMat_row_col_fr),3);
 
 for mm = 1:length(headRotMat_row_col_fr)
     %         if mod(mm,1000) == 0 ; disp(strcat({'Rotating Head Unit vectors: '},num2str(mm),{' of '}, num2str(length(headRotMat_row_col_fr)))); end
-    headVecX_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [.5e3; 0; 0]; %rotate a unit vector to point in the same direction as the head (or something like that)
-    headVecY_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; .5e3; 0];
-    headVecZ_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; 0; .5e3];
+    headVecX_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [1; 0; 0]; %rotate a unit vector to point in the same direction as the head (or something like that)
+    headVecY_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; 1; 0];
+    headVecZ_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; 0; 1];
 end
 
 
@@ -514,46 +514,55 @@ end
 for iii = 1:200
     disp('Your eyeball finder is bad and you should feel bad')
 end
+disp('its not *THAT* bad... ')
+
 %% calc calib mat points
 [ calibPoint ] = calcCalibPoint( shadow_fr_mar_dim, shadowMarkerNames, calibFrame);
 
 
+%% align yr wiggly bits
+%%% Find a temporal offset to align shadow and pupil streams using the
+%%% 'head nod' part of the calibration
+
+% [rEyeOffset, lEyeOffset] = calcTemporalOffset(headVecX_fr_xyz, rEye, lEye, sesh.wiggleFrames);
+
 %% calibrate yr eyeballs!
 %% %%% VOR FRAME METHOD - find camera alignment (i.e. the rotations needed for to make gaze vector align with calibration points during vorFrames)
-
-%right eye first
-vData.headRotMat_row_col_fr        = headRotMat_row_col_fr(:,:,vorFrames);
-vData.calibPoint            = calibPoint;
-vData.eyeballCenterXYZ      = rEyeballCenterXYZ(vorFrames,:);
-
-vData.confidence            = rEye_confidence(vorFrames);
-vData.eye_pupCircCen_x      = rEye_pupCircCen_x(vorFrames,:);
-vData.eye_pupCircCen_y      = rEye_pupCircCen_y(vorFrames,:);
-vData.eye_pupCircCen_z      = rEye_pupCircCen_z(vorFrames,:);
-
-vData.eye_sphCenCam_x     = rEye_sphCenCam_x(vorFrames,:);
-vData.eye_sphCenCam_y     = rEye_sphCenCam_y(vorFrames,:);
-vData.eye_sphCenCam_z     = rEye_sphCenCam_z(vorFrames,:);
-
-vData.shadow_fr_mar_dim     = squeeze(shadow_fr_mar_dim(vorFrames,:,:));
-vData.rHeelXYZ              = rHeelXYZ(vorFrames,:);
-vData.lHeelXYZ              = lHeelXYZ(vorFrames,:);
-vData.shadowMarkerNames     = shadowMarkerNames;
-vData.plotDebug             = true;
-
-vorAlignLossFun = @(camAlignEulerGuess) vorPupilAlignErrFun(vData, camAlignEulerGuess);
-
-initialCamEulerGuess = [0 0 0]; %starting guess for camAlignRotMat
-
-
-opts = optimset('Display', 'iter', 'MaxFunEvals',5000, 'PlotFcns',{@optimplotx, @optimplotfval,@optimplotfirstorderopt});
-
-[camAlignEuler, vorCalibErr] = fminunc(vorAlignLossFun, initialCamEulerGuess, opts);
-
-
-camAlignQuat= quaternion.eulerangles('123',camAlignEuler(1),camAlignEuler(2),camAlignEuler(3));
-rEyeAlignRotMat = camAlignQuat.RotationMatrix;
-
+    
+    %right eye first
+    vData.calibPoint            = calibPoint;
+    vData.eyeballCenterXYZ      = rEyeballCenterXYZ(vorFrames,:);
+    
+    vData.confidence            = rEye_confidence(vorFrames);
+    vData.eye_pupCircCen_x      = rEye_pupCircCen_x(vorFrames,:);
+    vData.eye_pupCircCen_y      = rEye_pupCircCen_y(vorFrames,:);
+    vData.eye_pupCircCen_z      = rEye_pupCircCen_z(vorFrames,:);
+    
+    vData.eye_sphCenCam_x     = rEye_sphCenCam_x(vorFrames,:);
+    vData.eye_sphCenCam_y     = rEye_sphCenCam_y(vorFrames,:);
+    vData.eye_sphCenCam_z     = rEye_sphCenCam_z(vorFrames,:);
+    
+    vData.headRotMat_row_col_fr        = headRotMat_row_col_fr(:,:,vorFrames);
+    vData.shadow_fr_mar_dim     = squeeze(shadow_fr_mar_dim(vorFrames,:,:));
+    vData.rHeelXYZ              = rHeelXYZ(vorFrames,:);
+    vData.lHeelXYZ              = lHeelXYZ(vorFrames,:);
+    vData.shadowMarkerNames     = shadowMarkerNames;
+    vData.plotDebug             = true;
+    
+    vorAlignLossFun = @(camAlignEulerGuess) vorPupilAlignErrFun(vData, camAlignEulerGuess);
+    
+    initialCamEulerGuess = [0 0 0]; %starting guess for camAlignRotMat
+    
+    
+    opts = optimset('Display', 'iter', 'MaxFunEvals',5000, 'PlotFcns',{@optimplotx, @optimplotfval,@optimplotfirstorderopt});
+    
+    [camAlignEuler, vorCalibErr] = fminunc(vorAlignLossFun, initialCamEulerGuess, opts);
+    
+    
+    camAlignQuat= quaternion.eulerangles('123',camAlignEuler(1),camAlignEuler(2),camAlignEuler(3));
+    rEyeAlignRotMat = camAlignQuat.RotationMatrix;
+    
+    
 
 
 % now for the left eye
@@ -676,46 +685,28 @@ disp('calckin up some rGazeGroundIntersections')
 disp('calckin up some lGazeGroundIntersections')
 [ lGazeGroundIntersection] = calcGroundFixations( rHeelXYZ, lHeelXYZ, lGazeXYZ, lEyeballCenterXYZ );
 
-
-
-% %% correct for misalignment between root marker and sub's spine, basically find a rotation that makes gaze be more or less equally distributed around the subject's walking path
-% disp('calcking alignment error')
-%     
-%     
-%     thisWalk.rGazeXYZ = rGazeXYZ;
-%     thisWalk.lGazeXYZ = lGazeXYZ;
-%     
-%     thisWalk.rEyeballCenterXYZ = rEyeballCenterXYZ;
-%     thisWalk.lEyeballCenterXYZ = lEyeballCenterXYZ;
-%     
-%     thisWalk.shadow_fr_mar_dim = shadow_fr_mar_dim;
-%     thisWalk.shadowMarkerNames = shadowMarkerNames;
-%         
-%     thisWalk.walks = sesh.walks;
-%     
-%     [thisWalk_fix] = correctAlignmentError_opt(thisWalk);
+%%
 % 
-%     
-%     %%%%replace relevant variables with fixed (i.e. correctively rotated)
-%     %%%%variables
-%     shadow_fr_mar_dim = thisWalk_fix.shadow_fr_mar_dim;
-%     rGazeXYZ = thisWalk_fix.rGazeXYZ;
-%     lGazeXYZ = thisWalk_fix.lGazeXYZ;
-%     
-%     rEyeballCenterXYZ = thisWalk_fix.rEyeballCenterXYZ;
-%     lEyeballCenterXYZ = thisWalk_fix.lEyeballCenterXYZ;
+% nonWalkFrames = true(length(rGazeXYZ),1);
+%  
+% for ww = 1:length(walks(:,1))
+% nonWalkFrames(walks(ww,1):walks(ww,2)) = false;
+% end
 % 
-%     rCorrAlignTheta = thisWalk_fix.rCorrAlignTheta;
-%     lCorrAlignTheta = thisWalk_fix.lCorrAlignTheta;
-%     
+% 
+%     thisWalk_orig = thisWalk;
+%     [thisWalk] = correctAlignmentError_opt(thisWalk_orig);
+
 %% Save out all the variables
-cd(dataPath)
-cd(condID)
-cd('OutputFiles')
+
+disp('Saving out mat file')
+cd(subPath)
+cd 'OutputFiles'
 save(strcat(condID,'.mat'))
 
 
 %% %%% make sphere thingy fr eyeball guys
+
 sphRes = 20;
 r = 35;%mean(rEye.sphere_radius); %p.s. it's 12mm, but let's blow 'em up a bit for ... visibilitiy... 8D
 [th, phi] = meshgrid(linspace(0, 2*pi, sphRes), linspace(-pi, pi, sphRes));
@@ -732,7 +723,7 @@ rArm = [15 21 22 26 22 23 24 25];
 
 comXYZ = squeeze(shadow_fr_mar_dim(:,1,:));
 
-frames = sesh.walks(6,1):10:sesh.walks(7,2);
+frames = walks(2,1):10:walks(2,2);
 % frames = vorFrames(1):10:vorFrames(end);
 cd
 %build up the hypothetical groundplane
@@ -883,10 +874,10 @@ for ii = frames
         hold on
         
         
-        plot3(shadow_fr_mar_dim(ii,lLeg,1),shadow_fr_mar_dim(ii,lLeg,2),shadow_fr_mar_dim(ii,lLeg,3),'b','LineWidth',2)
+        plot3(shadow_fr_mar_dim(ii,lLeg,1),shadow_fr_mar_dim(ii,lLeg,2),shadow_fr_mar_dim(ii,lLeg,3),'c','LineWidth',2)
         plot3(shadow_fr_mar_dim(ii,rLeg,1),shadow_fr_mar_dim(ii,rLeg,2),shadow_fr_mar_dim(ii,rLeg,3),'r','LineWidth',2)
         plot3(shadow_fr_mar_dim(ii,tors,1),shadow_fr_mar_dim(ii,tors,2),shadow_fr_mar_dim(ii,tors,3),'g','LineWidth',2)
-        plot3(shadow_fr_mar_dim(ii,lArm,1),shadow_fr_mar_dim(ii,lArm,2),shadow_fr_mar_dim(ii,lArm,3),'b','LineWidth',2)
+        plot3(shadow_fr_mar_dim(ii,lArm,1),shadow_fr_mar_dim(ii,lArm,2),shadow_fr_mar_dim(ii,lArm,3),'c','LineWidth',2)
         plot3(shadow_fr_mar_dim(ii,rArm,1),shadow_fr_mar_dim(ii,rArm,2),shadow_fr_mar_dim(ii,rArm,3),'r','LineWidth',2)
         
         %plot head axes
@@ -894,9 +885,9 @@ for ii = frames
         hy = shadow_fr_mar_dim(ii,28,2);
         hz = shadow_fr_mar_dim(ii,28,3);
         
-        plot3([ hx headVecX_fr_xyz(ii,1)+hx], [hy headVecX_fr_xyz(ii,2)+hy],[hz headVecX_fr_xyz(ii,3)+hz],'r-','LineWidth',3)
-        plot3([ hx headVecY_fr_xyz(ii,1)+hx], [hy headVecY_fr_xyz(ii,2)+hy],[hz headVecY_fr_xyz(ii,3)+hz],'g-','LineWidth',3)
-        plot3([ hx headVecZ_fr_xyz(ii,1)+hx], [hy headVecZ_fr_xyz(ii,2)+hy],[hz headVecZ_fr_xyz(ii,3)+hz],'b-','LineWidth',3)
+        plot3([ hx headVecX_fr_xyz(ii,1)*1000+hx], [hy headVecX_fr_xyz(ii,2)*1000+hy],[hz headVecX_fr_xyz(ii,3)*1000+hz],'r-','LineWidth',3)
+        plot3([ hx headVecY_fr_xyz(ii,1)*1000+hx], [hy headVecY_fr_xyz(ii,2)*1000+hy],[hz headVecY_fr_xyz(ii,3)*1000+hz],'g-','LineWidth',3)
+        plot3([ hx headVecZ_fr_xyz(ii,1)*1000+hx], [hy headVecZ_fr_xyz(ii,2)*1000+hy],[hz headVecZ_fr_xyz(ii,3)*1000+hz],'b-','LineWidth',3)
         
         bx =   shadow_fr_mar_dim(ii,1,1);
         by =   shadow_fr_mar_dim(ii,1,2);
@@ -906,6 +897,8 @@ for ii = frames
         rFootholds = steps_HS_TO_StanceLeg_XYZ(steps_HS_TO_StanceLeg_XYZ(:,3) == 1 ,:);
         lFootholds = steps_HS_TO_StanceLeg_XYZ(steps_HS_TO_StanceLeg_XYZ(:,3) == 2 ,:);
         
+        rFootholds(rFootholds(:,1)<frames(1)| rFootholds(:,1)>frames(end),:) = [];
+        lFootholds(lFootholds(:,1)<frames(1) | lFootholds(:,1)>frames(end),:) = [];
         
         %   plot vertical projection of foothold locations onto groundplane
         
@@ -934,7 +927,7 @@ for ii = frames
 %         CT = cbrewer('div', 'Spectral', 64);
 %         colormap(flipud(CT));
 colormap jet
-caxis([0 5])
+caxis([0 10])
         
     end
     %     view(-173, -43);
@@ -946,7 +939,7 @@ caxis([0 5])
     
     a = gca;
     a.CameraTarget = [comXYZ(ii,1), comXYZ(ii,2), comXYZ(ii,3)]; %point figure 'camera' at COM
-    a.CameraPosition = a.CameraTarget + [-1800 1800 2000]; %set camera position
+    a.CameraPosition = a.CameraTarget + [-2800 2800 3000]; %set camera position
     a.CameraViewAngle = 80;
     a.CameraUpVector = [ 0 1 0];
     a.Position = [0 0 1 1];
@@ -955,3 +948,4 @@ caxis([0 5])
     drawnow
     
 end
+

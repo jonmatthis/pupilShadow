@@ -69,30 +69,37 @@ end
 
 
 
-err = nan(length(comXYZ),1);
+[gazeTheta rho] = cart2pol(gazeXYZ(:,1), gazeXYZ(:,3));
 
-parfor ee = frames
-    
-% for ee = frames
-    thisDist = nan(length(gazeGroundIntersection),1);
-    for cc = ee:ee+300
-        
-        if cc > length(comXYZ)
-            break
-        end
-        
-        thisDist(end+1) = pdist([gazeGroundIntersection(ee,[1 3]); comXYZ(cc,[1 3])]);
-        
-    end
-    
-    err(ee) = min(thisDist);
-    
-end
+figure(483)
+histogram(gazeTheta,'Normalization','probability')
+xlim([-.5 .5])
 
-figure(324324)
-plot(err,'-o')
-drawnow
-corrAlignErr = nansum(err)/length(comXYZ);
+corrAlignErr = nanmean(gazeTheta);
+
+% 
+% parfor ee = frames
+%     
+% % for ee = frames
+%     thisDist = nan(length(gazeGroundIntersection),1);
+%     for cc = ee:ee+300
+%         
+%         if cc > length(comXYZ)
+%             break
+%         end
+%         
+%         thisDist(end+1) = pdist([gazeGroundIntersection(ee,[1 3]); comXYZ(cc,[1 3])]);
+%         
+%     end
+%     
+%     err(ee) = min(thisDist);
+%     
+% end
+
+% figure(324324)
+% plot(err,'-o')
+% drawnow
+% corrAlignErr = nansum(err)/length(comXYZ);
 
 
 
