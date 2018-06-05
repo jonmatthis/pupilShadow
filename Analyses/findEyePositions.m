@@ -1,4 +1,4 @@
-function [ rEyeballCenterXYZ, lEyeballCenterXYZ ] = findEyePositions( headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames, calibFrame)
+function [ rEyeballCenterXYZ, lEyeballCenterXYZ, worldCamCenterXYZ ] = findEyePositions( headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames, calibFrame)
 %FINDSCENECAMERAPOSITION calculate the location oof the eyeballs relative
 %to subject's head markers. This is the point from which the gaze vectors should
 %originate.
@@ -203,6 +203,10 @@ end
 rEyeballCenterXYZ = rEyeballCenterXYZ+hCen;
 lEyeballCenterXYZ = lEyeballCenterXYZ+hCen;
 
+worldCamCenterXYZ(:,1) = rEyeballCenterXYZ(:,1)*(1/3) + lEyeballCenterXYZ(:,1)*(1/3) + hTop(:,1)*(1/3);
+worldCamCenterXYZ(:,2) = rEyeballCenterXYZ(:,2)*(1/3) + lEyeballCenterXYZ(:,2)*(1/3) + hTop(:,2)*(1/3);
+worldCamCenterXYZ(:,3) = rEyeballCenterXYZ(:,3)*(1/3) + lEyeballCenterXYZ(:,3)*(1/3) + hTop(:,3)*(1/3);
+
 % %% Debug Plot - play video of head orientation axes, cam position is black star
 % 
 % figure(2)
@@ -325,6 +329,7 @@ rArm = [15 21 22 26 22 23 24 25];
     
         plot3([hCen(ii,1) rEyeballCenterXYZ(ii,1)], [hCen(ii,2) rEyeballCenterXYZ(ii,2)], [hCen(ii,3) rEyeballCenterXYZ(ii,3)],'rp-')
         plot3([hCen(ii,1) lEyeballCenterXYZ(ii,1)], [hCen(ii,2) lEyeballCenterXYZ(ii,2)], [hCen(ii,3) lEyeballCenterXYZ(ii,3)],'bp-')
+        plot3([hCen(ii,1) worldCamCenterXYZ(ii,1)], [hCen(ii,2) worldCamCenterXYZ(ii,2)], [hCen(ii,3) worldCamCenterXYZ(ii,3)],'kp-')
         
 
     %     surface(x1+hx,y1+hy,z1+hz,'FaceColor', 'none','EdgeColor',[.9 .9 .9])

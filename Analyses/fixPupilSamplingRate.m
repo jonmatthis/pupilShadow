@@ -1,14 +1,22 @@
-function [ rEye, lEye ] = fixPupilSamplingRate( pupilExportPath, prefRate, pupilUnixStartTime )
+function [ rEye, lEye, gaze ] = fixPupilSamplingRate( pupilExportPath, prefRate, pupilUnixStartTime )
 %FIXPUPILSAMPLINGRATE Summary of this function goes here
 %  resample PupilLabs data at a constant rate
 % path = The datapath of the pupil data
 % prefRate = desired sampling rate in Hz
 
-beep
 
 pupTable = readtable(strcat(pupilExportPath,'/pupil_positions.csv'));
+gazeTable = readtable(strcat(pupilExportPath,'/gaze_positions.csv'));
 
-varNames = pupTable.Properties.VariableNames;
+startTime = max([pupTable.timestamp(1) gazeTable.timestamp(1)]);
+endTime = min([pupTable.timestamp(end) gazeTable.timestamp(end)]);
+
+desTimestamp = (startTime-startTime):1/prefRate:(endTime-startTime);
+
+numFrames = length(desTimestamp)-prefRate; %the desired number of frames after resampling (minus 1 second, to avoid problems arising from minor mismatches in the various streams)
+
+%% Do the thing for the Pupil Positions Data (info from the left (1) and right (0) eye camera screens) 
+pupVarNames = pupTable.Properties.VariableNames;
 
 id = pupTable.id; %Which eyeball does this row reference? 0 = Right eye, 1 = Left eye
 
@@ -19,25 +27,28 @@ origTimestamps_eye0 = origTimestamps_all(id==0);
 origTimestamps_eye1 = origTimestamps_all(id==1);
 
 
+rEye.index_orig = pupTable.index(id==0);
+lEye.index_orig = pupTable.index(id==1);
 
-skipThese = {'id', 'index', 'method','model_id', 'timestamp'};
-for vv = 1:length(varNames)
-    thisVarName = varNames{vv};
+skipThese = {'id','index' 'method','model_id', 'timestamp'};
+for vv = 1:length(pupVarNames)
+    thisVarName = pupVarNames{vv};
     thisVar = pupTable.(thisVarName);
     
     if isempty(strmatch(thisVarName, skipThese)) %resample data
         [resampThisVarEye0, r_timestamp] = resample(thisVar(id==0), origTimestamps_eye0, prefRate,'pchip');
         [resampThisVarEye1, l_timestamp] = resample(thisVar(id==1), origTimestamps_eye1, prefRate,'pchip');
         
-        rEye.timestamp = r_timestamp(1:min([length(r_timestamp) length(l_timestamp)]));
-        lEye.timestamp = l_timestamp(1:min([length(r_timestamp) length(l_timestamp)]));
+        rEye.timestamp = r_timestamp(1:numFrames);
+        lEye.timestamp = l_timestamp(1:numFrames);
         
-        resampThisVarEye0 =   resampThisVarEye0(1:min([length(resampThisVarEye0) length(resampThisVarEye1)]));
-        resampThisVarEye1 =   resampThisVarEye1(1:min([length(resampThisVarEye0) length(resampThisVarEye1)]));
+        resampThisVarEye0 =   resampThisVarEye0(1:numFrames);
+        resampThisVarEye1 =   resampThisVarEye1(1:numFrames);
         
         rEye.(thisVarName) = resampThisVarEye0;
         lEye.(thisVarName) = resampThisVarEye1;
-        
+    
+       
     elseif ~strcmp(thisVarName,'timestamp')
         
         rEye.(thisVarName) = thisVar(id ==0);
@@ -49,19 +60,37 @@ end
 rEye.unixTimestamp = ((rEye.timestamp - rEye.timestamp(1)) + pupilUnixStartTime);
 lEye.unixTimestamp = ((lEye.timestamp - lEye.timestamp(1)) + pupilUnixStartTime);
 
-beep
 
-% %% debug plots
-% x = pupTable.norm_pos_x;
-% y = pupTable.norm_pos_y;
-% 
-% figure(22344566)
-% subplot(211)
-% plot(origTimestamps_eye0, x(id==0),'.-');
-% hold on
-% plot(rEye.timestamp, rEye.norm_pos_x,'.-')
-% 
-% subplot(212)
-% plot(origTimestamps_eye0, y(id==0),'.-');
-% hold on
-% plot(rEye.timestamp, rEye.norm_pos_y,'.-')
+%% Do the thing for the Gaze Data (Crosshairs on the world camera screen)
+
+gazeVarNames = gazeTable.Properties.VariableNames;
+
+
+origTimestamps_gaze = gazeTable.timestamp;
+
+
+gaze.index_orig = gazeTable.index;
+
+skipThese = {'base_data','index','timestamp'};
+for vv = 1:length(gazeVarNames)
+    thisVarName = gazeVarNames{vv};
+    thisVar = gazeTable.(thisVarName);
+    
+    if isempty(strmatch(thisVarName, skipThese)) %resample data
+        [resampThisVarGaze, g_timestamp] = resample(thisVar, origTimestamps_gaze, prefRate,'pchip');
+        
+        gaze.timestamp = g_timestamp(1:numFrames);
+        
+        resampThisVarGaze =   resampThisVarGaze(1:numFrames);
+        
+        gaze.(thisVarName) = resampThisVarGaze;    
+       
+    elseif ~strcmp(thisVarName,'timestamp')
+        
+        gaze.(thisVarName) = thisVar;
+        
+    end
+end
+
+gaze.unixTimestamp = ((gaze.timestamp - gaze.timestamp(1)) + pupilUnixStartTime);
+

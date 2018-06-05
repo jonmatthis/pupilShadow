@@ -31,8 +31,7 @@ figure(146789)
 length(hs)
 
 for ss = 1:length(hs)-1
-        disp(strcat({'Anti-Skateboarding Step# '},num2str(ss),{' of '}, num2str(length(hs))))
-
+    disp(strcat({'Anti-Skateboarding Step# '},num2str(ss),{' of '}, num2str(length(hs))))
         if stanceLeg(ss) == 1
             thisFootholdXYZ = squeeze(shadowFixed_fr_mar_dim(hs(ss),rheel,:)); % pull out lHeel marker;
         elseif stanceLeg(ss) == 2
