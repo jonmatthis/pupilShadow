@@ -1,0 +1,17 @@
+This package of functions is designed to process data simultaneously collected with a pupil labs eye tracker and a motion shadow mobile motion capture system.
+
+%% dependencies %%
+This package is dependent on:
+quaternion; https://www.mathworks.com/matlabcentral/fileexchange/33341-quaternion
+
+plane_line_intersect; https://www.mathworks.com/matlabcentral/fileexchange/17751-straight-line-and-plane-intersection
+
+
+%% main function descriptions %%
+processData.m: processes entire data collection sessions from the eye tracker and the mobile mo-cap system.
+
+splitWalks.m: takes processed data from a single session and breaks it into individual ‘walks’ based on provided frame numbers
+
+exampleProcessData.m: two examples given data that we both have
+
+
