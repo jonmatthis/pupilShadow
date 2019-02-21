@@ -258,9 +258,9 @@ headVecZ_fr_xyz = nan(length(headRotMat_row_col_fr),3);
 
 for mm = 1:length(headRotMat_row_col_fr)
     %         if mod(mm,1000) == 0 ; disp(strcat({'Rotating Head Unit vectors: '},num2str(mm),{' of '}, num2str(length(headRotMat_row_col_fr)))); end
-    headVecX_fr_xyz(mm,:) =  (headRotMat_row_col_fr(:,:,mm)* [.5e3; 0; 0])+squeeze(shadow_fr_mar_dim(mm,28,:)); %rotate a unit vector to point in the same direction as the head (or something like that)
-    headVecY_fr_xyz(mm,:) =  (headRotMat_row_col_fr(:,:,mm)* [0; .5e3; 0])+squeeze(shadow_fr_mar_dim(mm,28,:));
-    headVecZ_fr_xyz(mm,:) =  (headRotMat_row_col_fr(:,:,mm)* [0; 0; .5e3])+squeeze(shadow_fr_mar_dim(mm,28,:));
+    headVecX_fr_xyz(mm,:) =  (headRotMat_row_col_fr(:,:,mm)* [1e3; 0; 0])+shadow_fr_mar_dim(mm,28; %rotate a unit vector to point in the same direction as the head (or something like that)
+    headVecY_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; 1e3; 0];
+    headVecZ_fr_xyz(mm,:) =  headRotMat_row_col_fr(:,:,mm)* [0; 0; 1e3];
 end
 
 %% find eye positions in Shadow reference frame - BOTH

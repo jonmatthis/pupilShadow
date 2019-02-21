@@ -27,8 +27,15 @@ end
 %% set up hdf5 file (which is packed full of optic flow .flo files)
 if showOpticFlow
     floH5filename = [w.subID '_' w.takeID '_flo.hdf5'];
-    flowH5path = ['F:/opticFlowFloFiles' filesep w.subID filesep  floH5filename];
     
+    switch getenv('computername')
+        case 'MATHISPCWIN10'
+            flowH5path = ['F:/opticFlowFloFiles' filesep w.subID filesep  floH5filename];
+        case 'DESKTOP-L29LOMC'
+            flowH5path = ['D:/opticFlowFloFiles' filesep w.subID filesep  floH5filename];
+    end
+    
+
     flowStatsPath = [basePath filesep w.sessionID filesep 'OutputFiles' filesep w.sessionID '_' w.takeID '_OpticFlowData.mat' ];
     
     load(flowStatsPath, 'FOExy');
@@ -62,6 +69,11 @@ lHeelXYZ = w.lHeelXYZ;
 
 rGazeXYZ = w.rGazeXYZ;
 lGazeXYZ = w.lGazeXYZ;
+
+%%%%remove blinks
+blinks = w.lEye_blinks & w.rEye_blinks; 
+rGazeXYZ(blinks,:) = nan;
+lGazeXYZ(blinks,:) = nan;
 
 headVecX_fr_xyz = w.headVecX_fr_xyz;
 headVecY_fr_xyz = w.headVecY_fr_xyz;
@@ -352,9 +364,9 @@ for fr = frames
         hz = shadow_fr_mar_dim(fr,28,3);
         
         headVecScale = 1;
-        plot3([ hx headVecX_fr_xyz(fr,1)*headVecScale+hx], [hy headVecX_fr_xyz(fr,2)*headVecScale+hy],[hz headVecX_fr_xyz(fr,3)*headVecScale+hz],'r-','LineWidth',3)
-        plot3([ hx headVecY_fr_xyz(fr,1)*headVecScale+hx], [hy headVecY_fr_xyz(fr,2)*headVecScale+hy],[hz headVecY_fr_xyz(fr,3)*headVecScale+hz],'g-','LineWidth',3)
-        plot3([ hx headVecZ_fr_xyz(fr,1)*headVecScale+hx], [hy headVecZ_fr_xyz(fr,2)*headVecScale+hy],[hz headVecZ_fr_xyz(fr,3)*headVecScale+hz],'c-','LineWidth',3)
+        plot3([ hx headVecX_fr_xyz(fr,1)*headVecScale], [hy headVecX_fr_xyz(fr,2)*headVecScale],[hz headVecX_fr_xyz(fr,3)*headVecScale],'r-','LineWidth',3)
+        plot3([ hx headVecY_fr_xyz(fr,1)*headVecScale], [hy headVecY_fr_xyz(fr,2)*headVecScale],[hz headVecY_fr_xyz(fr,3)*headVecScale],'g-','LineWidth',3)
+        plot3([ hx headVecZ_fr_xyz(fr,1)*headVecScale], [hy headVecZ_fr_xyz(fr,2)*headVecScale],[hz headVecZ_fr_xyz(fr,3)*headVecScale],'c-','LineWidth',3)
         
         bx =   shadow_fr_mar_dim(fr,1,1);
         by =   shadow_fr_mar_dim(fr,1,2);
@@ -431,10 +443,10 @@ for fr = frames
     hold on
     
     if showOpticFlow
-        plot(flowRaw,'DecimationFactor',[40 40],'ScaleFactor',8); %plot optic flow arrows
+        plot(flowRaw,'DecimationFactor',[40 40],'ScaleFactor',4); %plot optic flow arrows
         h2 = findobj(gca,'Type','Quiver'); %pull out the assocated quiver object (in order to adjust appearance)
-        h2.MaxHeadSize = .04;
-        h2.LineWidth = 1.5;
+        h2.MaxHeadSize = .02;
+        h2.LineWidth = 1;
         h2.Color = 'c';
 
          plot(FOExy(worldFrameIndex(fr),1), FOExy(worldFrameIndex(fr),2),'kp','MarkerFaceColor','y','MarkerSize',16);

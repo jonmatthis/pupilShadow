@@ -118,9 +118,11 @@ for ww = 1:size(walks,1)
         disp(['Rotating ' varName '...']);
         varValue = eval(varName);
         
+        
         X = varValue(walks(ww,1): walks(ww,2), 1) - origin(1); %original X (translated to origin)
         Y = varValue(walks(ww,1): walks(ww,2), 2);
         Z = varValue(walks(ww,1): walks(ww,2), 3) - origin(3); %original Z (translated to origin)
+        
         
         debug = true;
         [x_r, z_r] = rotateFromV0toV1(X, Z, pt0, pt1, origin([1 3]), debug);
