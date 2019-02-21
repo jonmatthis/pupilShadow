@@ -19,6 +19,7 @@ outputPath = [sessionPath, filesep, 'OutputFiles'];
 takePath = [sessionPath filesep takeID];
 shadowTakeName = sesh.shadowTakeName;
 
+subID = sesh.subID;
 vorFrames = sesh.vorFrames;
 calibFrame = vorFrames(1);
 legLength = sesh.legLength;
@@ -134,10 +135,9 @@ end
 streamShadow_fr_mar_dim = nan(size(shadowDataResamp.unixTimestamp,1), length(xx), 3);
 
 for mm=1:length(xx)
-    
-    streamShadow_fr_mar_dim(:,mm,1) = shadowDataResamp.(streamData.Properties.VariableNames{xx(mm)});
-    streamShadow_fr_mar_dim(:,mm,2) = shadowDataResamp.(streamData.Properties.VariableNames{yy(mm)});
-    streamShadow_fr_mar_dim(:,mm,3) = shadowDataResamp.(streamData.Properties.VariableNames{zz(mm)});
+    streamShadow_fr_mar_dim(:,mm,1) = shadowDataResamp.(streamData.Properties.VariableNames{xx(mm)})*10;     %%% multiply by 10 to convert from cm to mm
+    streamShadow_fr_mar_dim(:,mm,2) = shadowDataResamp.(streamData.Properties.VariableNames{yy(mm)})*10;
+    streamShadow_fr_mar_dim(:,mm,3) = shadowDataResamp.(streamData.Properties.VariableNames{zz(mm)})*10;
 end
 
 shadowDataResamp.markerData = streamShadow_fr_mar_dim;
@@ -187,6 +187,8 @@ st = shadowUnixTime;
 st(trimShadowFrames) = [];
 syncedUnixTime = mean([st rt]')';
 avg_fps = round(mean(diff(syncedUnixTime).^-1));
+
+framerate = round(mean(diff(w.syncedUnixTime))^-1); %frame rate of the synced data
 
 shadowRAW_fr_mar_dim = shadowDataTrimmed.markerData;
 

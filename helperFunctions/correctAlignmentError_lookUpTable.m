@@ -1,4 +1,4 @@
-function  [thisWalk_fixed] = correctAlignmentError_lookUpTable(thisWalk_orig)
+function  [thisWalk_fixed] = correctAlignmentError_lookUpTable(thisWalk_orig,ww)
 
 thisWalk_fixed = thisWalk_orig;
 figure(8543);clf
@@ -88,7 +88,7 @@ while stillLooking
             thisWalk_fixed.rGazeXYZ = gazeXYZ;
             thisWalk_fixed.rEyeballCenterXYZ = eyeCenterXYZ;
             
-            if strcmp(thisWalk_orig.name, 'Fix') % For 'Distant Fixation' trials, use GazeXYZ instead of GazeGroundIntersections, becuase sub's gaze vectors rarely intersect groundplane in that condition
+            if strcmp(thisWalk_orig.trialType, 'Fix') % For 'Distant Fixation' trials, use GazeXYZ instead of GazeGroundIntersections, becuase sub's gaze vectors rarely intersect groundplane in that condition
                 newGroundFix = thisWalk_fixed.rGazeXYZ;
                 origGroundFix = thisWalk_orig.rGazeXYZ;
             else
@@ -104,7 +104,7 @@ while stillLooking
             thisWalk_fixed.lGazeXYZ = gazeXYZ;
             thisWalk_fixed.lEyeballCenterXYZ = eyeCenterXYZ;
             
-            if strcmp(thisWalk_orig.name, 'Fix') % For 'Distant Fixation' trials, use GazeXYZ instead of GazeGroundIntersections, becuase sub's gaze vectors rarely intersect groundplane in that condition
+            if strcmp(thisWalk_orig.trialType, 'Fix') % For 'Distant Fixation' trials, use GazeXYZ instead of GazeGroundIntersections, becuase sub's gaze vectors rarely intersect groundplane in that condition
                 newGroundFix = thisWalk_fixed.lGazeXYZ;
                 origGroundFix = thisWalk_orig.lGazeXYZ;
             else
@@ -175,7 +175,7 @@ end
         
         disp('......')
         dbstack
-        disp([thisWalk_orig.sessionID, ' ', thisWalk_orig.takeID, 'Walk# ',num2str(thisWalk_orig.ww)])
+        disp([thisWalk_orig.sessionID, ' ', thisWalk_orig.takeID, 'Walk# ',num2str(thisWalk_orig.ww) ' trial type: ' thisWalk_orig.trialType ])
         
         disp(['Current corrAlignTheta value is: ' num2str(corrAlignTheta) ', hows it look?'])
         newVal = input('Input new corrAlignTheta value (enter 99 to break loop):');
@@ -205,14 +205,29 @@ switch sessionID
     case '2018-01-23_JSM'
         switch takeID
             case 'Woodchips'
-                corrTable_ww = [nan 0 .36 .07 .25 .15 .15]; %should be 7 values for Woodchips data (6 walks, plus the VOR at the beginning)
-                corrAlignTheta = corrTable_ww(ww);
+                corrTable_ww = [ 0 .36 .07 .25 .15 .15]; %should be 7 values for Woodchips data (6 walks, plus the VOR at the beginning)
             case'Rocks'
-                corrTable_ww = [nan -.35 -.3 -.35 -.3 -.35 -.32]; %should be 7 values for walks Data(6 walks, plus the VOR at the beginning)
-                corrAlignTheta = corrTable_ww(ww);
-
+                corrTable_ww = [-.35 -.3 -.35 -.3 -.35 -.32]; %should be 7 values for walks Data(6 walks, plus the VOR at the beginning)
+        end
+    case '2018-01-31_JAW'
+        switch takeID
+            case 'Woodchips'
+                corrTable_ww = [ -.34 -.18 -.3 -.18 -.38 -.18 ]; %should be 7 values for Woodchips data (6 walks, plus the VOR at the beginning)
+            case'Rocks'
+                corrTable_ww = [ -.55 -.4 -.5 -.35 -.45 -.35]; %should be 7 values for walks Data(6 walks, plus the VOR at the beginning)
+        end
+        
+    case '2018-01-26_JAC'
+        switch takeID
+            case 'Woodchips'
+                corrTable_ww = [ -.3 -.12 -.3 .05 -.32 -.1 ]; %should be 7 values for Woodchips data (6 walks, plus the VOR at the beginning)
+            case'Rocks'
+                corrTable_ww = [ -.45 -.45 -.35 -.4 -.35 -.48 ]; %should be 7 values for walks Data(6 walks, plus the VOR at the beginning)
         end
 end
+
+                corrAlignTheta = corrTable_ww(ww);
+
 
 end
 

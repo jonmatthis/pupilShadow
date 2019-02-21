@@ -4,6 +4,7 @@ sesh = [];
 
 switch sessionID
     case '2018-01-23_JSM'
+        sesh.subID = 'JSM';
         sesh.legLength = 950; %right ASIS to right Medial Maleolus
         sesh.bodyMass = 84.1; %kg
         sesh.height = 1776; %mm
@@ -54,7 +55,7 @@ switch sessionID
         
         
     case '2018-01-26_JAC'
-        
+        sesh.subID = 'JAC';
         sesh.legLength = 890; %right ASIS to right Medial Maleolus
         sesh.bodyMass = 57.3; %kg
         sesh.height = 1660; %mm
@@ -62,7 +63,7 @@ switch sessionID
             
             case 'Woodchips'
                 sesh.shadowTakeName = 'take0001'; %shadow Take#
-                sesh.pupilExportDir = '0-40409';
+                sesh.pupilExportDir = '000';
                 %%%NOTE THAT THESE FRAME NUMBERS CORRESPOND TO FRAME#'S
                 %%%*AFTER* RESAMPLING
                 sesh.vorFrames = 5970:10807; %frames where sub is VORing (Pupil Frames)
@@ -80,7 +81,7 @@ switch sessionID
                 
             case 'Rocks'
                 sesh.shadowTakeName = 'take0002'; %shadow Take#
-                sesh.pupilExportDir = '0-18723';
+                sesh.pupilExportDir = '000';
                 %%%NOTE THAT THESE FRAME NUMBERS CORRESPOND TO FRAME#'S
                 %%%*AFTER* RESAMPLING
                 sesh.vorFrames = 3000:6550; %frames where sub is VORing (Pupil Frames)
@@ -101,7 +102,7 @@ switch sessionID
         
         
     case '2018-01-31_JAW'
-        
+        sesh.subID = 'JAW';
         sesh.legLength = 1025; %right ASIS to right Medial Maleolus
         sesh.bodyMass = 93.5; %kg
         sesh.height = 1940; %mm
@@ -109,7 +110,7 @@ switch sessionID
             
             case 'Woodchips'
                 sesh.shadowTakeName = 'take0001'; %shadow Take#
-                sesh.pupilExportDir = '0-36228';
+                sesh.pupilExportDir = '000';
                 
                 %%%NOTE THAT THESE FRAME NUMBERS CORRESPOND TO FRAME#'S
                 %%%*AFTER* RESAMPLING
@@ -129,7 +130,7 @@ switch sessionID
                 
             case 'Rocks'
                 sesh.shadowTakeName = 'take0002'; %shadow Take#
-                sesh.pupilExportDir = '0-15121';
+                sesh.pupilExportDir = '000';
                 
                 %%%NOTE THAT THESE FRAME NUMBERS CORRESPOND TO FRAME#'S
                 %%%*AFTER* RESAMPLING
