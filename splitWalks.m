@@ -37,7 +37,7 @@ disp(['loading data: ' fn '...']);
 load(fn);
 %% process optional function parameters
 defaultTransfer = { 'sessionID','takeID', 'subID', 'shadowMarkerNames', 'processData_date',...
-    'avg_fps', 'legLength','calibDist', 'framerate'};
+    'framerate', 'legLength','calibDist', 'px2mmScale'};
 lEyeData = {'lVorCalibErr'};
 rEyeData = {'rVorCalibErr'};
 if useEye(1), defaultTransfer = [defaultTransfer, rEyeData]; end
