@@ -4,18 +4,27 @@ function playLaserSkeleton(w)
 %laser skeleton video (with or without associated video)
 
 %% set up yr bools
-recordVid        = true; %Save a recording of the video
+recordVid        = false; %Save a recording of the video
 showVideo        = true; %Display the video
 showRetinalVideo = true; %Show retinal reference frame video
-showOpticFlow    = true; %show optic flow data
+showOpticFlow    = false; %show optic flow data
 %
 
 %% set up yr paths
-switch getenv('computername')
+[ret, name] = system('hostname');
+name = name(1:end-1);
+name = string(name);
+
+switch name
     case 'MATHISPCWIN10'
+        repoPath = 'D:\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'D:\Dropbox\ResearchProjects\OpticFlowProject\Data';
     case 'DESKTOP-L29LOMC'
+        repoPath ='C:\Users\jon\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'C:\Users\jon\Dropbox\ResearchProjects\OpticFlowProject\Data';
+    case 'karl-G551JW'
+        repoPath = '/home/karl/pupilShadow/';
+        basePath = '/home/karl/Dropbox/OpticFlowProject/Data';
 end
 
 if recordVid
@@ -122,9 +131,24 @@ eye1index = round(linspace(eye1index(1),eye1index(end),numel(w.frames))); %resam
 %% set up videos
 if showVideo
     
-    assert(exist('C:/dev/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function')
-    addpath('C:/dev/mexopencv')
-    addpath('C:/dev/mexopencv/opencv_contrib/')
+    
+    
+    switch name
+        case 'MATHISPCWIN10'
+            assert(exist('C:/dev/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function')
+            addpath('C:/dev/mexopencv')
+            addpath('C:/dev/mexopencv/opencv_contrib/')
+            
+        case 'DESKTOP-L29LOMC'
+            assert(exist('C:/dev/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function')
+            addpath('C:/dev/mexopencv')
+            addpath('C:/dev/mexopencv/opencv_contrib/')
+        case 'karl-G551JW'
+            assert(exist('/home/karl/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function')
+            addpath('/home/karl/mexopencv/')
+            addpath('/home/karl/mexopencv/opencv_contrib/')
+    end
+    
     
     worldVidObj = cv.VideoCapture([pupilFolderPath filesep 'world.mp4']);
     eye0VidObj  = cv.VideoCapture([pupilFolderPath filesep 'eye0.mp4']);

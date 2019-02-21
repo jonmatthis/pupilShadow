@@ -2,14 +2,20 @@ close all
 clear all
 restoredefaultpath
 
-switch getenv('computername')
+[ret, name] = system('hostname');
+name = name(1:end-1);
+name = string(name);
+
+switch name
     case 'MATHISPCWIN10'
         repoPath = 'D:\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'D:\Dropbox\ResearchProjects\OpticFlowProject\Data';
     case 'DESKTOP-L29LOMC'
         repoPath ='C:\Users\jon\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'C:\Users\jon\Dropbox\ResearchProjects\OpticFlowProject\Data';
-%         basePath = 'D:\OpticFlowProject\Data';
+    case 'karl-G551JW'
+        repoPath = '/home/karl/pupilShadow/';
+        basePath = '/home/karl/Dropbox/OpticFlowProject/Data';
 end
 
 addpath(genpath(repoPath))
@@ -45,6 +51,7 @@ for subNum = 1:numSubs
         % process data
         sesh = sessionFunction(sessionID,takeID);
         processData(sessionID,takeID,sessionPath,useEye,sesh);
+        
         
         
         % walks and walk_names are necessary for splitWalks
