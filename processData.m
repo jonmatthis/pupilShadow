@@ -186,9 +186,7 @@ rt(trimPupFrames) = [];
 st = shadowUnixTime;
 st(trimShadowFrames) = [];
 syncedUnixTime = mean([st rt]')';
-avg_fps = round(mean(diff(syncedUnixTime).^-1));
-
-framerate = round(mean(diff(w.syncedUnixTime))^-1); %frame rate of the synced data
+framerate = round(mean(diff(syncedUnixTime).^-1));
 
 shadowRAW_fr_mar_dim = shadowDataTrimmed.markerData;
 
