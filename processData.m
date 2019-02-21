@@ -333,6 +333,30 @@ if useEye(2)
     camAlignQuat= quaternion.eulerangles('123',camAlignEuler(1),camAlignEuler(2),camAlignEuler(3));
     lEyeAlignRotMat = camAlignQuat.RotationMatrix;
 end
+ 
+%%  calc px2mmScale (from 'fixPupilVid.m) - 2018-04-19
+% % % % JSM Woodchips
+% tapePxX = [849,1063;835,1060;843,1064;855,1067;856,1068;857,1071;862,1073;844,1059;849,1063;566,798;552,782;821,1040;831,1046]
+% tapePxY = [815,820;1011,1012;937,941;729.000000000000,735.000000000000;734.000000000000,736;558.000000000000,562.000000000000;555.000000000000,560.000000000000;779,781;768.000000000000,770;793,781;792,779;774,773;766.000000000000,767.000000000000]
+
+% % % JSM Rocks
+% tapePxX =[885,1094;874,1084;878,1088;879,1087;882,1092;881,1091;882,1093;884,1092;881,1091;880,1091;882,1093;882,1094;880,1096;876,1096;875,1098];
+% tapePxY =[819,803;814,800;813,799;812,797;808,792;810,795;811,797;811,796;808,795;811,799;823,808;881,868;933,919;984,970;1053,1037];
+%
+%         %[x,y] pixel coordinates of either end of .5m tape at ~vorFrames(1)
+%         calibTape1 = [tapePxX(:,1) tapePxY(:,1)];
+%         calibTape2 = [tapePxX(:,2) tapePxY(:,2)];
+%         scaleDist = sqrt( (calibTape1(:,1)-calibTape2(:,1)).^2 + (calibTape1(:,2)-calibTape2(:,2)).^2); %euclidean distance between pt1 & pt2 (size of 0.5m tape in pixel units)
+%
+%         scaleSize = 500;
+%         px2mmScale = scaleSize/mean(scaleDist);
+
+if ~(resWidth == 1920 && resHeight == 1080)
+    disp('Be Aware - The px2mmScale value here assumes 1920x1080 resolution, and this video is some other resolution.')
+    keyboard
+end
+
+px2mmScale =2.3232;
 
 %% Calculate Gaze Vectors
 
