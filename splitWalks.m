@@ -163,7 +163,7 @@ for ww = 1:size(walks,1)
     Z = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,6); %original Z (Y)
     [x_r, z_r] = rotateFromV0toV1(X, Z, pt0, pt1, origin([1 3]),0 );
     thisWalk.steps_HS_TO_StanceLeg_XYZ(:,4:6) = [x_r' thisWalk.steps_HS_TO_StanceLeg_XYZ(:,5) z_r'];
-    thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) - walks(ww,1:2);
+    thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) - walks(ww,1);
     
     % add unrotated split data
     for dd = 1:length(data_to_split)
