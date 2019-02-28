@@ -30,8 +30,10 @@ end
 switch getenv('computername')
     case 'MATHISPCWIN10'
         basePath = 'D:\Dropbox\ResearchProjects\OpticFlowProject\Data';
+        addpath(genpath('D:\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
     case 'DESKTOP-L29LOMC'
         basePath = 'C:\Users\jon\Dropbox\ResearchProjects\OpticFlowProject\Data';
+        addpath(genpath('C:\Users\jon\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
 end
 
 if recordVid

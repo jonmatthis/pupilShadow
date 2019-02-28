@@ -3,13 +3,15 @@ clear all
 restoredefaultpath
 
 switch getenv('computername')
-    case 'MATHISPCWIN10'
+    case 'MATHISPCWIN10' %Jon's desktop PC
         repoPath = 'D:\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'D:\Dropbox\ResearchProjects\OpticFlowProject\Data';
-    case 'DESKTOP-L29LOMC'
+                addpath(genpath('D:\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
+
+    case 'DESKTOP-L29LOMC' %Jon's windows laptop
         repoPath ='C:\Users\jon\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'C:\Users\jon\Dropbox\ResearchProjects\OpticFlowProject\Data';
-%         basePath = 'D:\OpticFlowProject\Data';
+        addpath(genpath('C:\Users\jon\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
 end
 
 addpath(genpath(repoPath))
