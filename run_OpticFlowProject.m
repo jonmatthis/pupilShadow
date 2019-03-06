@@ -6,7 +6,7 @@ if isunix
     [ret, name] = system('hostname');
     name = name(1:end-1);
     name = string(name);
-else
+elseif ispc | ismac 
     name = getenv('computername');
 end
 
