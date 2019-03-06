@@ -1,4 +1,4 @@
-function [x_r, y_r] = rotateFromV0toV1(X, Y, pt0, pt1, origin, debug)
+function [x_r, y_r, theta] = rotateFromV0toV1(X, Y, pt0, pt1, origin, debug)
 
 %%%%%[x_r, y_r] = rotateFromV0toV1(X, Y, pt0, pt1, origin, rotDir)
 % % % rotates X and Y data by amount defined by angle between 

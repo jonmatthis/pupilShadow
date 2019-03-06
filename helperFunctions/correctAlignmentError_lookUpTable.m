@@ -1,4 +1,4 @@
-function  [thisWalk_fixed] = correctAlignmentError_lookUpTable(thisWalk_orig,ww)
+function  [thisWalk_fixed] = correctAlignmentError_lookUpTable(thisWalk_orig)
 
 thisWalk_fixed = thisWalk_orig;
 figure(8543);clf
