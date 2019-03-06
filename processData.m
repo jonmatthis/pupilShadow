@@ -192,9 +192,10 @@ shadowRAW_fr_mar_dim = shadowDataTrimmed.markerData;
 
 %% SH Pull out head/chest/hips acceleration -- SHADOW ONLY
 
-headAccXYZ = [shadowDataTrimmed.Head_ax, shadowDataTrimmed.Head_ay, shadowDataTrimmed.Head_az];
-chestAccXYZ = [shadowDataTrimmed.Chest_ax, shadowDataTrimmed.Chest_ay, shadowDataTrimmed.Chest_az];
-hipsAccXYZ = [shadowDataTrimmed.Hips_ax, shadowDataTrimmed.Hips_ay, shadowDataTrimmed.Hips_az];
+headAccXYZ = [shadowDataTrimmed.Head_lax, shadowDataTrimmed.Head_lay, shadowDataTrimmed.Head_laz];
+chestAccXYZ = [shadowDataTrimmed.Chest_lax, shadowDataTrimmed.Chest_lay, shadowDataTrimmed.Chest_laz];
+hipsAccXYZ = [shadowDataTrimmed.Hips_lax, shadowDataTrimmed.Hips_lay, shadowDataTrimmed.Hips_laz];
+
 
 %% Find Steps -- SHADOW ONLY
 disp('Finding steps')
@@ -209,6 +210,7 @@ wRaw.avg_fps = mean(diff(syncedUnixTime).^-1);
 %SHADOW ONLY
 disp('Fixing Skateboards')
 [shadow_fr_mar_dim] = fixSkateboarding_kb(wRaw, allSteps_HS_TO_StanceLeg);
+
 
 %% build step_TO_HS_ft_XYZ variable
 % SHADOW ONLY
@@ -249,25 +251,17 @@ headGlobalQuat_wxyz = normalize(quaternion(HeadGqw, HeadGqx, HeadGqy, HeadGqz));
 
 headRotMat_row_col_fr = headGlobalQuat_wxyz.RotationMatrix;
 
-%% calculate head orientation vectors (mostly for debugging, tbh)
-% SHADOW ONLY
-
-headVecX_fr_xyz = nan(length(headRotMat_row_col_fr),3);
-headVecY_fr_xyz = nan(length(headRotMat_row_col_fr),3);
-headVecZ_fr_xyz = nan(length(headRotMat_row_col_fr),3);
-
-for mm = 1:length(headRotMat_row_col_fr)
-    %         if mod(mm,1000) == 0 ; disp(strcat({'Rotating Head Unit vectors: '},num2str(mm),{' of '}, num2str(length(headRotMat_row_col_fr)))); end
-    headVecX_fr_xyz(mm,:) =  (headRotMat_row_col_fr(:,:,mm)* [.5e3; 0; 0])+squeeze(shadow_fr_mar_dim(mm,28,:)); %rotate a unit vector to point in the same direction as the head (or something like that)
-    headVecY_fr_xyz(mm,:) =  (headRotMat_row_col_fr(:,:,mm)* [0; .5e3; 0])+squeeze(shadow_fr_mar_dim(mm,28,:));
-    headVecZ_fr_xyz(mm,:) =  (headRotMat_row_col_fr(:,:,mm)* [0; 0; .5e3])+squeeze(shadow_fr_mar_dim(mm,28,:));
-end
 
 %% find eye positions in Shadow reference frame - BOTH
 [ rEyeballCenterXYZ, lEyeballCenterXYZ,worldCamCenterXYZ ] = findEyePositions(headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames,  calibFrame);
 
 %% calc calib mat points - BOTH
 [ calibPoint ] = calcCalibPoint( shadow_fr_mar_dim, shadowMarkerNames, calibFrame);
+
+
+%% find head vecotrs
+[ headVecX_fr_xyz, headVecY_fr_xyz, headVecZ_fr_xyz] = findHeadVecs(headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames,  calibFrame, calibPoint, vorFrames);
+
 
 %% calibrate yr eyeballs (and yr WorldCamGaze guy)!
 % VOR FRAME METHOD - find camera alignment (i.e. the rotations needed for to make gaze vector align with calibration points during vorFrames)
@@ -381,6 +375,7 @@ if useEye(2)
     disp('lGazeGroundIntersections')
     [ lGazeGroundIntersection] = calcGroundFixations( rHeelXYZ, lHeelXYZ, lGazeXYZ, lEyeballCenterXYZ );
 end
+
 
 %% Get saccades (Jon)
 if useEye(1)

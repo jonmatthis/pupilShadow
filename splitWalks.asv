@@ -133,7 +133,7 @@ for ww = 1:size(walks,1)
     
         %% rotate, but don't translate this data
     for dd = 1:length(defaultRotateOnly)
-        varName = defaultRotateOnly{dd};
+        varName = data_to_split_translate_and_rotate{dd};
         disp(['Rotating ' varName '...']);
         varValue = eval(varName);
         
@@ -143,7 +143,7 @@ for ww = 1:size(walks,1)
         Z = varValue(walks(ww,1): walks(ww,2), 3); %original Z (centered on origin)
         
         [th, rho] = cart2pol(X,Z);
-        [x_r, z_r] = pol2cart(th-theta, rho);
+        [x_r, z_r] = pol2cart(th+theta, rho);
         
         %%debug - same format and fig# as in 'rotateV0toV1.m'
         figure(8989)
@@ -155,8 +155,8 @@ for ww = 1:size(walks,1)
         axis equal
         hold off
         
-        thisWalk.(varName) = [x_r, Y, z_r];
-        
+        thisWalk.(varName) = [x_r', Y, z_r'];
+        keyboard
     end
     %% rotate shadowmarker data (it's special)
     disp('Rotating Marker Data...')
