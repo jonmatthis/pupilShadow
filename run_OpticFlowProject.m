@@ -2,16 +2,24 @@ close all
 clear all
 restoredefaultpath
 
-switch getenv('computername')
+[ret, name] = system('hostname');
+name = name(1:end-1);
+name = string(name);
+
+switch name
     case 'MATHISPCWIN10' %Jon's desktop PC
         repoPath = 'D:\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'D:\Dropbox\ResearchProjects\OpticFlowProject\Data';
                 addpath(genpath('D:\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
-
     case 'DESKTOP-L29LOMC' %Jon's windows laptop
         repoPath ='C:\Users\jon\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'C:\Users\jon\Dropbox\ResearchProjects\OpticFlowProject\Data';
         addpath(genpath('C:\Users\jon\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
+    case 'karl-G551JW'
+        assert(exist('/home/karl/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function')
+        addpath('/home/karl/mexopencv/')
+        addpath('/home/karl/mexopencv/opencv_contrib/')
+
 end
 
 addpath(genpath(repoPath))
@@ -21,7 +29,7 @@ addpath(genpath(repoPath))
 
 numSubs = 3;
 numConds = 2;
-for subNum = 4:4
+for subNum = 1:3
     
     switch subNum
         case 1
@@ -36,7 +44,7 @@ for subNum = 4:4
     
     
     
-    for condNum = 2:numConds
+    for condNum = 1:numConds
         
         switch condNum
             case 1
