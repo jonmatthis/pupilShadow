@@ -2,9 +2,13 @@ close all
 clear all
 restoredefaultpath
 
-[ret, name] = system('hostname');
-name = name(1:end-1);
-name = string(name);
+if isunix
+    [ret, name] = system('hostname');
+    name = name(1:end-1);
+    name = string(name);
+else
+    name = getenv('computername');
+end
 
 switch name
     case 'MATHISPCWIN10' %Jon's desktop PC

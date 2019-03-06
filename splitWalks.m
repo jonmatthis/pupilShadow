@@ -218,7 +218,6 @@ for ww = 1:size(walks,1)
     thisWalk_orig = thisWalk;
     thisWalk = corrAlign(thisWalk_orig);
     
-<<<<<<< HEAD
 
     
     %% % final debug plot. Gaze data should be well aligned with the
@@ -247,7 +246,6 @@ for ww = 1:size(walks,1)
     drawnow
     
     
-=======
     if debugPlot
         
         %%% final debug plot. Gaze data should be well aligned with the
@@ -282,7 +280,6 @@ for ww = 1:size(walks,1)
         drawnow
         
     end
->>>>>>> e6a739f5b1b00c714ea1c43650571d7cdff69bfa
     
     
     allWalks{ww} = thisWalk; %push thisWalk into the allWalks cell array
