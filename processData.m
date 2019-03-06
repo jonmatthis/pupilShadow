@@ -46,7 +46,7 @@ resWidth = res(1);
 resHeight = res(2);
 
 
-%% resample pupil data to enforce constant framerate
+%% resample pupil data to enforce constant framerate (also grab porX porY)
 % PUPIL
 
 pupilExportPath = [pupilDataPath filesep 'exports' filesep sesh.pupilExportDir];
@@ -81,6 +81,10 @@ gaze = fixSamplingRate(gazeTable,startTime,endTime,pupilUnixStartTime,...
     prefRate,skipThese);
 pupUnixTime = gaze.unixTimestamp;
 
+ % porX and porY
+ [index, norm_pos_x, norm_pos_y] = pull_index_normposx_normposy(strcat(pupilExportPath,filesep,'gaze_positions.csv'));
+ [porX porY] =  downsamplegaze(norm_pos_x,norm_pos_y,index,resHeight,resWidth);
+
 
 %% Find frame of world video that most closely matches each rEye, lEye and gaze data frame
 worldUnixTimestamp = (worldTimestamps-worldTimestamps(1)) + pupilUnixStartTime;
@@ -99,7 +103,12 @@ disp('Loading Shadow Data ...')
 
 streamFilename = [shadowDataPath, filesep, shadowTakeName, '_stream.csv'];
 streamData = readtable(streamFilename);  % this is way better than importdata because it auto fills some stuff for us
-streamData.timestamp = streamData.Head_time;
+
+if isfield(streamData,'Head_time')==0
+    streamData.timestamp = streamData.time;     % shadow V3
+else
+    streamData.timestamp = streamData.Head_time;  % shadow V2
+end
 
 %% Find ShadoUnixStartTime - SHADOW ONLY
 
@@ -116,8 +125,8 @@ shadowUnixStartTime = posixtime(shadowStartDateTime);
 
 %% Shadow Resampling - SHADOW ONLY
 skipThese = {'markerData','og_time'};
-shadowDataResamp = fixSamplingRate(streamData,streamData.Head_time(1),...
-    streamData.Head_time(end), shadowUnixStartTime, prefRate,skipThese);
+shadowDataResamp = fixSamplingRate(streamData,streamData.time(1),...
+    streamData.time(end), shadowUnixStartTime, prefRate,skipThese);
 
 shadowUnixTime = shadowDataResamp.timestamp + shadowUnixStartTime;
 
@@ -130,6 +139,11 @@ zz = find(endsWith(streamData.Properties.VariableNames,'ltz'));
 shadowMarkerNames = streamData.Properties.VariableNames(xx);
 for i=1:length(shadowMarkerNames)
     shadowMarkerNames{i} = shadowMarkerNames{i}(1:end-4);
+    
+    % shadow V3
+    if strcmp(shadowMarkerNames{i},'HeadEnd')==1
+        shadowMarkerNames{i}='HeadTop';
+    end
 end
 
 streamShadow_fr_mar_dim = nan(size(shadowDataResamp.unixTimestamp,1), length(xx), 3);
