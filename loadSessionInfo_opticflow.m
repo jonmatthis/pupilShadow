@@ -147,8 +147,33 @@ switch sessionID
                 
                 sesh.trialType = {'Rocks'; 'Rocks'; 'Rocks'; 'Rocks'; 'Rocks'; 'Rocks'; };
                 
+                
+                
         end
         
-        
+    case '2019-02-27_JSM'
+        sesh.subID = 'JSM';
+        sesh.legLength = 950; %right ASIS to right Medial Maleolus
+        sesh.bodyMass = 84.1; %kg
+        sesh.height = 1776; %mm
+        switch condID
+            
+            
+            case 'Rocks'
+                sesh.shadowTakeName = 'take0002'; %shadow Take#
+                sesh.pupilExportDir = '000';
+                %%%NOTE THAT THESE FRAME NUMBERS CORRESPOND TO FRAME#'S
+                %%%*AFTER* RESAMPLING
+                sesh.vorFrames = 1786:5319; %frames where sub is VORing (Pupil Frames)
+                sesh.calibFrame =  sesh.vorFrames(1); %frame where sub is lookin good at the primary calibration marker
+                
+                sesh.walks = ...
+                    [8925 10758;
+                    10962 12658;
+                    13880 20667
+                    ];
+                
+                sesh.trialType = {'Rocks'; 'Rocks'; 'Rocks'; 'Rocks'; 'Rocks'; 'Rocks'; };
+        end
 end
 
