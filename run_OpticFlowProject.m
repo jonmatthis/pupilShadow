@@ -18,7 +18,7 @@ addpath(genpath(repoPath))
 
 numSubs = 3;
 numConds = 2;
-for subNum = 1:numSubs
+for subNum = 4:4
     
     switch subNum
         case 1
@@ -27,11 +27,13 @@ for subNum = 1:numSubs
             sessionID = '2018-01-26_JAC';
         case 3
             sessionID = '2018-01-31_JAW';
+        case 4
+            sessionID = '2019-02-27_JSM';
     end
     
     
     
-    for condNum = 1:numConds
+    for condNum = 2:numConds
         
         switch condNum
             case 1
@@ -44,8 +46,13 @@ for subNum = 1:numSubs
         useEye = [1;1];
         sessionFunction = @loadSessionInfo_opticflow;
         
+        
+        
         % process data
         sesh = sessionFunction(sessionID,takeID);
+        
+      
+        
         processData(sessionID,takeID,sessionPath,useEye,sesh);
         
         

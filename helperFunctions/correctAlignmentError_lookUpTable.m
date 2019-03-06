@@ -95,7 +95,7 @@ while stillLooking
                 newGroundFix = thisWalk_fixed.rGazeGroundIntersection;
                 origGroundFix = thisWalk_orig.rGazeGroundIntersection;
             end
-                        
+            
         elseif iter == 2
             %             disp('calckin up some lGazeGroundIntersections')
             [ thisWalk_fixed.lGazeGroundIntersection] = calcGroundFixations( rHeelXYZ, lHeelXYZ, gazeXYZ, eyeCenterXYZ );
@@ -111,7 +111,7 @@ while stillLooking
                 newGroundFix = thisWalk_fixed.lGazeGroundIntersection;
                 origGroundFix = thisWalk_orig.lGazeGroundIntersection;
             end
-                        
+            
         end
         
         
@@ -122,52 +122,52 @@ while stillLooking
         origGroundFix_z = origGroundFix - comXYZ;
         
         
-%         [comTheta, comRho] = cart2pol(comXYZ(:,1), comXYZ(:,3));
-%         [newGroundFixTheta, newGroundFixRho] = cart2pol(newGroundFix_z(:,1), newGroundFix_z(:,3));
-%         [origGroundFixTheta, origGroundFixRho] = cart2pol(origGroundFix_z(:,1), origGroundFix_z(:,3));
-%         
-%         
-%         
-%         newThetaErr = comTheta-newGroundFixTheta; %trying to get gaze to be more or less equally distributed around COM path
-%         origThetaErr = comTheta-origGroundFixTheta; %trying to get gaze to be more or less equally distributed around COM path
-%         
-%         
-%         subplot(1,2,iter)
-%         polarhistogram(origThetaErr,'Normalization','probability','DisplayName','comTheta-groundFixTheta (original)')
-%         hold on
-%         polarhistogram(newThetaErr,'Normalization','probability','DisplayName','comTheta-groundFixTheta ("fixed")')
-%         l  =   legend;
-%         l.Location = 'south';
-%         
-%         if iter == 1
-%             title('Right Eye gaze alignment correction')
-%         elseif iter == 2
-%             title('Left Eye gaze alignment correction')
-%         end
-%         hold off
-if iter == 2
-    clf
-    subplot(2,1,1)
-    
-    plot(thisWalk_orig.comXYZ(:,1), thisWalk_orig.comXYZ(:,3),'m')
-    
-    hold on
-    plot(thisWalk_orig.rGazeGroundIntersection(:,1), thisWalk_orig.rGazeGroundIntersection(:,3),'r.')
-    plot(thisWalk_orig.lGazeGroundIntersection(:,1), thisWalk_orig.lGazeGroundIntersection(:,3),'b.')
-    title('Original Data - NOTE: Y axis scale magnifies offset error ')
-    
-    subplot(2,1,2)
-    
-    plot(thisWalk_fixed.comXYZ(:,1), thisWalk_fixed.comXYZ(:,3),'m')
-    
-    hold on
-    plot(thisWalk_fixed.rGazeGroundIntersection(:,1), thisWalk_fixed.rGazeGroundIntersection(:,3),'r.')
-    plot(thisWalk_fixed.lGazeGroundIntersection(:,1), thisWalk_fixed.lGazeGroundIntersection(:,3),'b.')
-    title('rotated Data - Positive corrAlignTheta shifts move gaze points down. Try to get red/blue dots to align with COM path (magenta line)')
-    
-    drawnow
-end
-
+        %         [comTheta, comRho] = cart2pol(comXYZ(:,1), comXYZ(:,3));
+        %         [newGroundFixTheta, newGroundFixRho] = cart2pol(newGroundFix_z(:,1), newGroundFix_z(:,3));
+        %         [origGroundFixTheta, origGroundFixRho] = cart2pol(origGroundFix_z(:,1), origGroundFix_z(:,3));
+        %
+        %
+        %
+        %         newThetaErr = comTheta-newGroundFixTheta; %trying to get gaze to be more or less equally distributed around COM path
+        %         origThetaErr = comTheta-origGroundFixTheta; %trying to get gaze to be more or less equally distributed around COM path
+        %
+        %
+        %         subplot(1,2,iter)
+        %         polarhistogram(origThetaErr,'Normalization','probability','DisplayName','comTheta-groundFixTheta (original)')
+        %         hold on
+        %         polarhistogram(newThetaErr,'Normalization','probability','DisplayName','comTheta-groundFixTheta ("fixed")')
+        %         l  =   legend;
+        %         l.Location = 'south';
+        %
+        %         if iter == 1
+        %             title('Right Eye gaze alignment correction')
+        %         elseif iter == 2
+        %             title('Left Eye gaze alignment correction')
+        %         end
+        %         hold off
+        if iter == 2
+            clf
+            subplot(2,1,1)
+            
+            plot(thisWalk_orig.comXYZ(:,1), thisWalk_orig.comXYZ(:,3),'m')
+            
+            hold on
+            plot(thisWalk_orig.rGazeGroundIntersection(:,1), thisWalk_orig.rGazeGroundIntersection(:,3),'r.')
+            plot(thisWalk_orig.lGazeGroundIntersection(:,1), thisWalk_orig.lGazeGroundIntersection(:,3),'b.')
+            title('Original Data - NOTE: Y axis scale magnifies offset error ')
+            
+            subplot(2,1,2)
+            
+            plot(thisWalk_fixed.comXYZ(:,1), thisWalk_fixed.comXYZ(:,3),'m')
+            
+            hold on
+            plot(thisWalk_fixed.rGazeGroundIntersection(:,1), thisWalk_fixed.rGazeGroundIntersection(:,3),'r.')
+            plot(thisWalk_fixed.lGazeGroundIntersection(:,1), thisWalk_fixed.lGazeGroundIntersection(:,3),'b.')
+            title('rotated Data - Positive corrAlignTheta shifts move gaze points down. Try to get red/blue dots to align with COM path (magenta line)')
+            
+            drawnow
+        end
+        
         
     end
     
@@ -224,9 +224,14 @@ switch sessionID
             case'Rocks'
                 corrTable_ww = [ -.45 -.45 -.35 -.4 -.35 -.48 ]; %should be 7 values for walks Data(6 walks, plus the VOR at the beginning)
         end
+    case '2019-02-27_JSM' %test
+        switch takeID
+              case'Rocks'
+                corrTable_ww = [0.3 .24 .31 .23 0 0]; %test
+        end
 end
 
-                corrAlignTheta = corrTable_ww(ww);
+corrAlignTheta = corrTable_ww(ww);
 
 
 end

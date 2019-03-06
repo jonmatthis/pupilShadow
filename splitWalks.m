@@ -25,6 +25,9 @@ function[walks] = splitWalks(sessionPath,takeID,walks,walk_names, varargin)
 %     point is at the origin, then put into individual walks
 % 'CorrectAlignmentFcn' - A function that accepts the current walks struct
 %     and does some small corrections on the alignment
+
+debugPlot = false;
+
 %% define some path locations
 outputPath = [sessionPath, filesep, 'OutputFiles'];
 takePath = [sessionPath filesep takeID];
@@ -215,6 +218,7 @@ for ww = 1:size(walks,1)
     thisWalk_orig = thisWalk;
     thisWalk = corrAlign(thisWalk_orig);
     
+<<<<<<< HEAD
 
     
     %% % final debug plot. Gaze data should be well aligned with the
@@ -243,6 +247,42 @@ for ww = 1:size(walks,1)
     drawnow
     
     
+=======
+    if debugPlot
+        
+        %%% final debug plot. Gaze data should be well aligned with the
+        %%% COM path
+        figure(sum(double(sessionID))+sum(double(takeID))) %dumb way to get a unique number for each session/take combo
+        %     if mod(ii,2); %% plot even/odd walks on differnet subplots (because even plots are rotated 180 from odd ones)
+        %         subplot(311);
+        %     else
+        %         subplot(312)
+        %     end
+        
+        
+        subplot(round(length(walks(2:end,:))/2),2,ww)
+        
+        
+        hold on
+        plot(thisWalk.rGazeGroundIntersection(:,1), thisWalk.rGazeGroundIntersection(:,3),'r.')
+        plot(thisWalk.lGazeGroundIntersection(:,1), thisWalk.lGazeGroundIntersection(:,3),'b.')
+        
+        plot(thisWalk.comXYZ(1,1), thisWalk.comXYZ(1,3),'gp')
+        plot(thisWalk.comXYZ(end,1), thisWalk.comXYZ(end,3),'rp')
+        
+        plot(thisWalk.steps_HS_TO_StanceLeg_XYZ(1,4), thisWalk.steps_HS_TO_StanceLeg_XYZ(1,6),'go')
+        plot(thisWalk.steps_HS_TO_StanceLeg_XYZ(end,4), thisWalk.steps_HS_TO_StanceLeg_XYZ(end,6),'ro')
+        
+        plot(thisWalk.comXYZ(:,1), thisWalk.comXYZ(:,3),'g','LineWidth',2)
+        
+        axis equal
+        
+        title(strcat(sessionID,{' walk# '},num2str(ww),'-',thisWalk.trialType))
+        
+        drawnow
+        
+    end
+>>>>>>> e6a739f5b1b00c714ea1c43650571d7cdff69bfa
     
     
     allWalks{ww} = thisWalk; %push thisWalk into the allWalks cell array
