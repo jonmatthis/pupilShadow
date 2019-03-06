@@ -48,7 +48,7 @@ if useEye(2), defaultTransfer = [defaultTransfer, lEyeData]; end
 
 
 defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y'...
-    'headAccXYZ','chestAccXYZ','hipsAccXYZ','worldFrameIndex','headGlobalQuat_wxyz'};
+    'headAccXYZ','chestAccXYZ','hipsAccXYZ','worldFrameIndex'};
 lEyeData = {'lEye.theta','lEye.phi','lEye.norm_pos_x',...
     'lEye.norm_pos_y','lEye.circle_3d_radius','lEye.blinks'};
 rEyeData = {'rEye.theta','rEye.phi','rEye.norm_pos_x',...
@@ -90,8 +90,6 @@ for ww = 1:size(walks,1)
     thisWalk.eyes = useEye;
     thisWalk.frames = walks(ww,1): walks(ww,2);
     
-    
-    
     % transfer data
     for dd = 1:length(data_to_transfer)
         varName = data_to_transfer{dd};
@@ -116,13 +114,6 @@ for ww = 1:size(walks,1)
         pt1 = [1000 0]; %positive-X vector
         thisWalk.isThisVORCalibrationData = false;
     end
-    
-    % rotation around Y axis (aligning com trajectory to x-axis)
-    vec1 = (pt0-origin([1 3]))/norm((pt0-origin([1 3])));
-    vec2 = [1 0]; 
-    alignTheta = acos(dot(vec1,vec2));
-    thisWalk.alignTheta = alignTheta;
-    
     
     % rotate data
     for dd = 1:length(data_to_split_rotate)
@@ -154,6 +145,7 @@ for ww = 1:size(walks,1)
         s(:,mm,:) = [x_r' thismarker(:,2) z_r'];
     end
     thisWalk.shadow_fr_mar_dim = s;
+    
     % load some indvidual data markers in separately (e.g., RightHeel ->
     % rHeelXYZ)
     markers = {'RightHeel','RightToe','RightFoot','LeftHeel','LeftToe',...
@@ -174,7 +166,7 @@ for ww = 1:size(walks,1)
     Z = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,6); %original Z (Y)
     [x_r, z_r] = rotateFromV0toV1(X, Z, pt0, pt1, origin([1 3]),0 );
     thisWalk.steps_HS_TO_StanceLeg_XYZ(:,4:6) = [x_r' thisWalk.steps_HS_TO_StanceLeg_XYZ(:,5) z_r'];
-    thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) - walks(ww,1:2);
+    thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) - walks(ww,1);
     
     % add unrotated split data
     for dd = 1:length(data_to_split)

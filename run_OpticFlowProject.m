@@ -2,20 +2,16 @@ close all
 clear all
 restoredefaultpath
 
-[ret, name] = system('hostname');
-name = name(1:end-1);
-name = string(name);
-
-switch name
-    case 'MATHISPCWIN10'
+switch getenv('computername')
+    case 'MATHISPCWIN10' %Jon's desktop PC
         repoPath = 'D:\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'D:\Dropbox\ResearchProjects\OpticFlowProject\Data';
-    case 'DESKTOP-L29LOMC'
+                addpath(genpath('D:\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
+
+    case 'DESKTOP-L29LOMC' %Jon's windows laptop
         repoPath ='C:\Users\jon\Dropbox\ResearchProjects\pupilShadow';
         basePath = 'C:\Users\jon\Dropbox\ResearchProjects\OpticFlowProject\Data';
-    case 'karl-G551JW'
-        repoPath = '/home/karl/pupilShadow/';
-        basePath = '/home/karl/Dropbox/OpticFlowProject/Data';
+        addpath(genpath('C:\Users\jon\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
 end
 
 addpath(genpath(repoPath))
@@ -58,7 +54,6 @@ for subNum = 4:4
       
         
         processData(sessionID,takeID,sessionPath,useEye,sesh);
-        
         
         
         % walks and walk_names are necessary for splitWalks
