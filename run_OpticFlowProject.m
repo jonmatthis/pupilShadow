@@ -19,7 +19,8 @@ switch name
         assert(exist('/home/karl/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function')
         addpath('/home/karl/mexopencv/')
         addpath('/home/karl/mexopencv/opencv_contrib/')
-
+         repoPath = '/home/karl/pupilShadow/';
+        basePath = '/home/karl/Dropbox/OpticFlowProject/Data';
 end
 
 addpath(genpath(repoPath))
