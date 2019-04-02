@@ -49,7 +49,7 @@ if useEye(1), defaultTransfer = [defaultTransfer, rEyeData]; end
 if useEye(2), defaultTransfer = [defaultTransfer, lEyeData]; end
 
 
-defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex'};
+defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex', 'saccFrames'};
 lEyeData = {'lEye.theta','lEye.phi','lEye.norm_pos_x',...
     'lEye.norm_pos_y','lEye.circle_3d_radius','lEye.blinks'};
 rEyeData = {'rEye.theta','rEye.phi','rEye.norm_pos_x',...
@@ -147,7 +147,7 @@ for ww = 1:size(walks,1)
         
         [th, rho] = cart2pol(X,Z);
         [x_r, z_r] = pol2cart(th-theta, rho);
-        
+                
         %%debug - same format and fig# as in 'rotateV0toV1.m'
         figure(8989)
         plot(X,Z,'-ob')

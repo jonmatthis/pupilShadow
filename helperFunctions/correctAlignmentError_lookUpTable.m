@@ -28,6 +28,11 @@ while stillLooking
             gazeXYZ = thisWalk_orig.rGazeXYZ;
             eyeCenterXYZ = thisWalk_orig.rEyeballCenterXYZ;
             groundFix = thisWalk_orig.rGazeGroundIntersection;
+            
+            headVecX = thisWalk_orig.headVecX_fr_xyz;
+            headVecY = thisWalk_orig.headVecY_fr_xyz;
+            headVecZ = thisWalk_orig.headVecZ_fr_xyz;
+            
         elseif iter == 2
             gazeXYZ = thisWalk_orig.lGazeXYZ;
             eyeCenterXYZ = thisWalk_orig.lEyeballCenterXYZ;
@@ -67,6 +72,23 @@ while stillLooking
         % revert camXYZ to right coord system
         eyeCenterXYZ(:,1) = c_z(:,1)+comXYZ(:,1);
         eyeCenterXYZ(:,3) = c_z(:,2)+comXYZ(:,3);
+        
+        if iter == 1 %rotate head vectors
+            
+            [headXtheta, headXrho] = cart2pol(headVecX(:,1), headVecX(:,3));
+            [headVecX(:,1), headVecX(:,3)] = pol2cart(headXtheta-corrAlignTheta, headXrho); %rotate by -CorrAlignTheta
+            
+            [headYtheta, headYrho] = cart2pol(headVecY(:,1), headVecY(:,3));
+            [headVecY(:,1), headVecY(:,3)] = pol2cart(headYtheta-corrAlignTheta, headYrho); %rotate by -CorrAlignTheta
+            
+            [headZtheta, headZrho] = cart2pol(headVecZ(:,1), headVecZ(:,3));
+            [headVecZ(:,1), headVecZ(:,3)] = pol2cart(headZtheta-corrAlignTheta, headZrho); %rotate by -CorrAlignTheta
+            
+            thisWalk_fixed.headVecX_fr_xyz = headVecX;
+            thisWalk_fixed.headVecY_fr_xyz = headVecY;
+            thisWalk_fixed.headVecZ_fr_xyz = headVecZ;
+        end
+        
         
         % recalculate ground fixations
         
@@ -226,7 +248,7 @@ switch sessionID
         end
     case '2019-02-27_JSM' %test
         switch takeID
-              case'Rocks'
+            case'Rocks'
                 corrTable_ww = [0.3 .24 .31 .23 0 0]; %test
         end
 end

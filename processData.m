@@ -82,8 +82,7 @@ gaze = fixSamplingRate(gazeTable,startTime,endTime,pupilUnixStartTime,...
 pupUnixTime = gaze.unixTimestamp;
 
  % porX and porY
- [index, norm_pos_x, norm_pos_y] = pull_index_normposx_normposy(strcat(pupilExportPath,filesep,'gaze_positions.csv'));
- [porX porY] =  downsamplegaze(norm_pos_x,norm_pos_y,index,resHeight,resWidth);
+ [porX, porY] =  downsamplegaze(gazeTable.norm_pos_x,gazeTable.norm_pos_y,gazeTable.index,resHeight,resWidth);
 
 
 %% Find frame of world video that most closely matches each rEye, lEye and gaze data frame
@@ -103,12 +102,12 @@ disp('Loading Shadow Data ...')
 
 streamFilename = [shadowDataPath, filesep, shadowTakeName, '_stream.csv'];
 streamData = readtable(streamFilename);  % this is way better than importdata because it auto fills some stuff for us
-
-if isfield(streamData,'Head_time')==0
-    streamData.timestamp = streamData.time;     % shadow V3
-else
+% 
+% if isfield(streamData,'Body_time')==0
+%     streamData.timestamp = streamData.time;     % shadow V3
+% else
     streamData.timestamp = streamData.Head_time;  % shadow V2
-end
+% end
 
 %% Find ShadoUnixStartTime - SHADOW ONLY
 
@@ -125,8 +124,8 @@ shadowUnixStartTime = posixtime(shadowStartDateTime);
 
 %% Shadow Resampling - SHADOW ONLY
 skipThese = {'markerData','og_time'};
-shadowDataResamp = fixSamplingRate(streamData,streamData.time(1),...
-    streamData.time(end), shadowUnixStartTime, prefRate,skipThese);
+shadowDataResamp = fixSamplingRate(streamData,streamData.Head_time(1),...
+    streamData.Head_time(end), shadowUnixStartTime, prefRate,skipThese);
 
 shadowUnixTime = shadowDataResamp.timestamp + shadowUnixStartTime;
 
@@ -204,11 +203,6 @@ framerate = round(mean(diff(syncedUnixTime).^-1));
 
 shadowRAW_fr_mar_dim = shadowDataTrimmed.markerData;
 
-%% SH Pull out head/chest/hips acceleration -- SHADOW ONLY
-
-headAccXYZ = [shadowDataTrimmed.Head_lax, shadowDataTrimmed.Head_lay, shadowDataTrimmed.Head_laz];
-chestAccXYZ = [shadowDataTrimmed.Chest_lax, shadowDataTrimmed.Chest_lay, shadowDataTrimmed.Chest_laz];
-hipsAccXYZ = [shadowDataTrimmed.Hips_lax, shadowDataTrimmed.Hips_lay, shadowDataTrimmed.Hips_laz];
 
 
 %% Find Steps -- SHADOW ONLY
@@ -253,7 +247,6 @@ axis equal
 hold off
 
 %% Make Head rotation matrices
-% SHADOW ONLY
 
 HeadGqw = shadowDataTrimmed.Head_Gqw;
 HeadGqx = shadowDataTrimmed.Head_Gqx;
@@ -276,6 +269,38 @@ headRotMat_row_col_fr = headGlobalQuat_wxyz.RotationMatrix;
 %% find head vecotrs
 [ headVecX_fr_xyz, headVecY_fr_xyz, headVecZ_fr_xyz] = findHeadVecs(headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames,  calibFrame, calibPoint, vorFrames);
 
+ %% re-orient headVec and head, hips, chest acceleration based on body orienation during VOR frame# 1
+ 
+%Pull out head/chest/hips acceleration
+
+headAccXYZ = [shadowDataTrimmed.Head_lax, shadowDataTrimmed.Head_lay, shadowDataTrimmed.Head_laz];
+chestAccXYZ = [shadowDataTrimmed.Chest_lax, shadowDataTrimmed.Chest_lay, shadowDataTrimmed.Chest_laz];
+hipsAccXYZ = [shadowDataTrimmed.Hips_lax, shadowDataTrimmed.Hips_lay, shadowDataTrimmed.Hips_laz];
+
+figure
+plot(headAccXYZ,'.-')
+hold on
+% plot([hs hs]',[ones(size(hs))-10 ones(size(hs))+10]','r')
+xlim([2e4 2.1e4])
+ylim([-1 1])
+title([sessionID ' - ' takeID])
+
+% %%
+% inData.shadow_fr_mar_dim = shadow_fr_mar_dim;
+% inData.shadowMarkerNames = shadowMarkerNames;
+% inData.calibPoint = calibPoint;
+% inData.calibFrame = calibFrame;
+% inData.hipsAccXYZ = hipsAccXYZ;
+% inData.chestAccXYZ = chestAccXYZ;
+% inData.headAccXYZ = headAccXYZ;
+% inData.headVecX_fr_xyz = headVecX_fr_xyz;
+% inData.headVecY_fr_xyz = headVecY_fr_xyz;
+% inData.headVecZ_fr_xyz = headVecZ_fr_xyz;
+%  
+% 
+% debugAcc = true;
+% 
+% [hipsAccXYZ, chestAccXYZ, headAccXYZ] = reorientAccData(inData, debugAcc);
 
 %% calibrate yr eyeballs (and yr WorldCamGaze guy)!
 % VOR FRAME METHOD - find camera alignment (i.e. the rotations needed for to make gaze vector align with calibration points during vorFrames)

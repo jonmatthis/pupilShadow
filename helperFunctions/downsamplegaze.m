@@ -23,7 +23,7 @@ function [porX_ds porY_ds] = downsamplegaze(norm_pos_x, norm_pos_y, index, heigh
 
 for ii=0:max(index)
         
-    if mod(ii, 100) == 0 
+    if mod(ii, 1000) == 0 
         disp(strcat('Resampling POR data:', num2str(ii),'-of-',num2str(max(index))))
     end
     
@@ -38,7 +38,5 @@ porY = (1-porY)*height;
 
 porX_ds = porX;
 porY_ds = porY;
-
-save('ds_distorted.mat','porX','porY');
 
 end
