@@ -81,8 +81,14 @@ gaze = fixSamplingRate(gazeTable,startTime,endTime,pupilUnixStartTime,...
     prefRate,skipThese);
 pupUnixTime = gaze.unixTimestamp;
 
+<<<<<<< HEAD
  % porX and porY
  [porX, porY] =  downsamplegaze(gazeTable.norm_pos_x,gazeTable.norm_pos_y,gazeTable.index,resHeight,resWidth);
+=======
+% porX and porY
+[index, norm_pos_x, norm_pos_y] = pull_index_normposx_normposy(strcat(pupilExportPath,filesep,'gaze_positions.csv'));
+[porX porY] =  downsamplegaze(norm_pos_x,norm_pos_y,index,resHeight,resWidth);
+>>>>>>> 15acbad5e4444a6176ebec32802b40a421287a51
 
 
 %% Find frame of world video that most closely matches each rEye, lEye and gaze data frame
@@ -102,12 +108,26 @@ disp('Loading Shadow Data ...')
 
 streamFilename = [shadowDataPath, filesep, shadowTakeName, '_stream.csv'];
 streamData = readtable(streamFilename);  % this is way better than importdata because it auto fills some stuff for us
+<<<<<<< HEAD
 % 
 % if isfield(streamData,'Body_time')==0
 %     streamData.timestamp = streamData.time;     % shadow V3
 % else
+=======
+
+if isfield(streamData,'Head_time')==0
+    if isfield(streamData,'time')==0
+        streamData.timestamp = streamData.Body_time;
+        
+    else
+        streamData.timestamp = streamData.time;     % shadow V3
+    end
+else
+>>>>>>> 15acbad5e4444a6176ebec32802b40a421287a51
     streamData.timestamp = streamData.Head_time;  % shadow V2
 % end
+
+streamData.time = streamData.timestamp;
 
 %% Find ShadoUnixStartTime - SHADOW ONLY
 
@@ -366,7 +386,7 @@ if useEye(2)
     camAlignQuat= quaternion.eulerangles('123',camAlignEuler(1),camAlignEuler(2),camAlignEuler(3));
     lEyeAlignRotMat = camAlignQuat.RotationMatrix;
 end
- 
+
 %%  calc px2mmScale (from 'fixPupilVid.m) - 2018-04-19
 % % % % JSM Woodchips
 % tapePxX = [849,1063;835,1060;843,1064;855,1067;856,1068;857,1071;862,1073;844,1059;849,1063;566,798;552,782;821,1040;831,1046]
