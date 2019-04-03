@@ -49,7 +49,7 @@ if useEye(1), defaultTransfer = [defaultTransfer, rEyeData]; end
 if useEye(2), defaultTransfer = [defaultTransfer, lEyeData]; end
 
 
-defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex'};
+defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex','headGlobalQuat_wxyz'};
 lEyeData = {'lEye.theta','lEye.phi','lEye.norm_pos_x',...
     'lEye.norm_pos_y','lEye.circle_3d_radius','lEye.blinks'};
 rEyeData = {'rEye.theta','rEye.phi','rEye.norm_pos_x',...
@@ -59,7 +59,7 @@ if useEye(2), defaultSplit = [defaultSplit, lEyeData]; end
 
 
 defaultTranslateAndRotate = {'comXYZ'}';
-defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','headAccXYZ','chestAccXYZ','hipsAccXYZ'};
+defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
 rEyeData = {'rGazeGroundIntersection','rEyeballCenterXYZ','rGazeXYZ'};
 lEyeData = {'lGazeGroundIntersection', 'lEyeballCenterXYZ','lGazeXYZ'};
 if useEye(1), defaultTranslateAndRotate = [defaultTranslateAndRotate, rEyeData]; end
