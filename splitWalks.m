@@ -147,7 +147,7 @@ for ww = 1:size(walks,1)
         
         [th, rho] = cart2pol(X,Z);
         [x_r, z_r] = pol2cart(th-theta, rho);
-        
+                
         %%debug - same format and fig# as in 'rotateV0toV1.m'
         figure(8989)
         plot(X,Z,'-ob')

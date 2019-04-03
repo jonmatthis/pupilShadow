@@ -23,15 +23,18 @@ hCen = (hTop+hC1)/2;
 hCenCalib = hCen(calibFrame,:);
 
 
-headXCalib_XYZ_z = normr(calibPoint- hCenCalib); %  Head X is just the calibration point
+headCalib_vec = normr(calibPoint- hCenCalib); %  use headCen - CalibPoint vec to tell which part of head is front
 headYCalib_XYZ_z = normr(hTop(calibFrame,:)- hCenCalib); %  Head Y is just the top of the head
-headZCalib_XYZ_z = cross(headXCalib_XYZ_z,headYCalib_XYZ_z); % Head Z is coming out of the right of the head
+headZCalib_XYZ_z = cross(headCalib_vec,headYCalib_XYZ_z); % Head Z is coming out of the right of the head
+headXCalib_XYZ_z = cross(headYCalib_XYZ_z,headZCalib_XYZ_z); %define head X based on head Y and Z
 
 headVecScale = 1;
 headXCalib_XYZ_z = headXCalib_XYZ_z *headVecScale;
 headYCalib_XYZ_z = headYCalib_XYZ_z *headVecScale;
 headZCalib_XYZ_z = headZCalib_XYZ_z *headVecScale;
 
+%%%make sure head vectors are orthogonal
+assert(dot(headXCalib_XYZ_z,headYCalib_XYZ_z) + dot(headXCalib_XYZ_z,headZCalib_XYZ_z) + dot(headZCalib_XYZ_z,headYCalib_XYZ_z) < eps*10, 'Your head vectors arent othogonal')
 %% debug plot - show head vectors only
 figure(543)
 clf
@@ -80,7 +83,7 @@ headZ_uy = dot(headZCalib_XYZ_z, uy);
 headZ_uz = dot(headZCalib_XYZ_z, uz);
 
 
-debug = false;
+debug = true;
 if debug
     % Debug Plot
     

@@ -81,9 +81,8 @@ gaze = fixSamplingRate(gazeTable,startTime,endTime,pupilUnixStartTime,...
     prefRate,skipThese);
 pupUnixTime = gaze.unixTimestamp;
 
-% porX and porY
-[index, norm_pos_x, norm_pos_y] = pull_index_normposx_normposy(strcat(pupilExportPath,filesep,'gaze_positions.csv'));
-[porX porY] =  downsamplegaze(norm_pos_x,norm_pos_y,index,resHeight,resWidth);
+ % porX and porY
+ [porX, porY] =  downsamplegaze(gazeTable.norm_pos_x,gazeTable.norm_pos_y,gazeTable.index,resHeight,resWidth);
 
 
 %% Find frame of world video that most closely matches each rEye, lEye and gaze data frame
@@ -103,27 +102,13 @@ disp('Loading Shadow Data ...')
 
 streamFilename = [shadowDataPath, filesep, shadowTakeName, '_stream.csv'];
 streamData = readtable(streamFilename);  % this is way better than importdata because it auto fills some stuff for us
-
-% if isfield(streamData,'Head_time')==0
-%     if isempty(streamData.time)==1
-%         streamData.timestamp = streamData.Body_time;
-%         
-%     else
-%         streamData.timestamp = streamData.time;     % shadow V3
-%     end
+% 
+% if isfield(streamData,'Body_time')==0
+%     streamData.timestamp = streamData.time;     % shadow V3
 % else
-%     streamData.timestamp = streamData.Head_time;  % shadow V2
+    streamData.timestamp = streamData.Head_time;  % shadow V2
 % end
-
-if any(strcmp('Body_time', streamData.Properties.VariableNames))
-    streamData.time = streamData.Body_time;
-elseif any(strcmp('Head_time', streamData.Properties.VariableNames))
-    streamData.time = streamData.Head_time;
-elseif any(strcmp('timestamp', streamData.Properties.VariableNames))
-   streamData.time = streamData.timestamp; 
-else
-    streamData.time = streamData.time;
-end
+>>>>>>> 43349daabcc02fac1091131795627c12298345e4
 
 streamData.timestamp = streamData.time;
 %% Find ShadoUnixStartTime - SHADOW ONLY
@@ -141,8 +126,8 @@ shadowUnixStartTime = posixtime(shadowStartDateTime);
 
 %% Shadow Resampling - SHADOW ONLY
 skipThese = {'markerData','og_time'};
-shadowDataResamp = fixSamplingRate(streamData,streamData.time(1),...
-    streamData.time(end), shadowUnixStartTime, prefRate,skipThese);
+shadowDataResamp = fixSamplingRate(streamData,streamData.Head_time(1),...
+    streamData.Head_time(end), shadowUnixStartTime, prefRate,skipThese);
 
 shadowUnixTime = shadowDataResamp.timestamp + shadowUnixStartTime;
 
@@ -220,11 +205,6 @@ framerate = round(mean(diff(syncedUnixTime).^-1));
 
 shadowRAW_fr_mar_dim = shadowDataTrimmed.markerData;
 
-%% SH Pull out head/chest/hips acceleration -- SHADOW ONLY
-
-headAccXYZ = [shadowDataTrimmed.Head_lax, shadowDataTrimmed.Head_lay, shadowDataTrimmed.Head_laz];
-chestAccXYZ = [shadowDataTrimmed.Chest_lax, shadowDataTrimmed.Chest_lay, shadowDataTrimmed.Chest_laz];
-hipsAccXYZ = [shadowDataTrimmed.Hips_lax, shadowDataTrimmed.Hips_lay, shadowDataTrimmed.Hips_laz];
 
 
 %% Find Steps -- SHADOW ONLY
@@ -269,7 +249,6 @@ axis equal
 hold off
 
 %% Make Head rotation matrices
-% SHADOW ONLY
 
 HeadGqw = shadowDataTrimmed.Head_Gqw;
 HeadGqx = shadowDataTrimmed.Head_Gqx;
