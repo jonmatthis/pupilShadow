@@ -104,19 +104,28 @@ disp('Loading Shadow Data ...')
 streamFilename = [shadowDataPath, filesep, shadowTakeName, '_stream.csv'];
 streamData = readtable(streamFilename);  % this is way better than importdata because it auto fills some stuff for us
 
-if isfield(streamData,'Head_time')==0
-    if isfield(streamData,'time')==0
-        streamData.timestamp = streamData.Body_time;
-        
-    else
-        streamData.timestamp = streamData.time;     % shadow V3
-    end
+% if isfield(streamData,'Head_time')==0
+%     if isempty(streamData.time)==1
+%         streamData.timestamp = streamData.Body_time;
+%         
+%     else
+%         streamData.timestamp = streamData.time;     % shadow V3
+%     end
+% else
+%     streamData.timestamp = streamData.Head_time;  % shadow V2
+% end
+
+if any(strcmp('Body_time', streamData.Properties.VariableNames))
+    streamData.time = streamData.Body_time;
+elseif any(strcmp('Head_time', streamData.Properties.VariableNames))
+    streamData.time = streamData.Head_time;
+elseif any(strcmp('timestamp', streamData.Properties.VariableNames))
+   streamData.time = streamData.timestamp; 
 else
-    streamData.timestamp = streamData.Head_time;  % shadow V2
+    streamData.time = streamData.time;
 end
 
-streamData.time = streamData.timestamp;
-
+streamData.timestamp = streamData.time;
 %% Find ShadoUnixStartTime - SHADOW ONLY
 
 takeStruct = xml2struct([shadowDataPath, filesep,'take.mTake']); % turns out '.mTake' files are just secret XML's!! :O
@@ -231,7 +240,7 @@ wRaw.avg_fps = mean(diff(syncedUnixTime).^-1);
 %SHADOW ONLY
 disp('Fixing Skateboards')
 [shadow_fr_mar_dim] = fixSkateboarding_kb(wRaw, allSteps_HS_TO_StanceLeg);
-
+comXYZ = squeeze(shadow_fr_mar_dim(:,1,:));
 
 %% build step_TO_HS_ft_XYZ variable
 % SHADOW ONLY
@@ -283,6 +292,13 @@ headRotMat_row_col_fr = headGlobalQuat_wxyz.RotationMatrix;
 %% find head vecotrs
 [ headVecX_fr_xyz, headVecY_fr_xyz, headVecZ_fr_xyz] = findHeadVecs(headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames,  calibFrame, calibPoint, vorFrames);
 
+for ii = 1:length(headGlobalQuat_wxyz)
+   
+    basisX(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[1;0;0];
+    basisY(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[0;1;0];
+    basisZ(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[0;0;1];
+
+end
 
 %% calibrate yr eyeballs (and yr WorldCamGaze guy)!
 % VOR FRAME METHOD - find camera alignment (i.e. the rotations needed for to make gaze vector align with calibration points during vorFrames)
