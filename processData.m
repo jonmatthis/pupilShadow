@@ -425,6 +425,19 @@ else
     worldFrameIndex = lEye.index;
 end
 
+%% get cam frustum
+
+
+frustum = getCamFrustum(headVecX_fr_xyz,headVecY_fr_xyz,headVecZ_fr_xyz,gaze.norm_pos_x,gaze.norm_pos_y,...
+    px2mmScale,calibDist,rGazeXYZ,lGazeXYZ,rEyeballCenterXYZ,lEyeballCenterXYZ,resHeight,resWidth);
+
+
+patchTopLeft = squeeze(frustum(1,:,:))';
+patchBottomLeft = squeeze(frustum(2,:,:))';
+patchBottomRight = squeeze(frustum(3,:,:))';
+patchTopRight = squeeze(frustum(4,:,:))';
+
+
 %% Save out all the variables
 if ~exist(outputPath,'file')
     mkdir(outputPath)
