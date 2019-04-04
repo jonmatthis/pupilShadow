@@ -108,9 +108,8 @@ streamData = readtable(streamFilename);  % this is way better than importdata be
 % else
     streamData.timestamp = streamData.Head_time;  % shadow V2
 % end
->>>>>>> 43349daabcc02fac1091131795627c12298345e4
 
-streamData.timestamp = streamData.time;
+% streamData.timestamp = streamData.time;
 %% Find ShadoUnixStartTime - SHADOW ONLY
 
 takeStruct = xml2struct([shadowDataPath, filesep,'take.mTake']); % turns out '.mTake' files are just secret XML's!! :O

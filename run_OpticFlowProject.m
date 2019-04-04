@@ -23,8 +23,10 @@ switch name
         assert(exist('/home/karl/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function')
         addpath('/home/karl/mexopencv/')
         addpath('/home/karl/mexopencv/opencv_contrib/')
+        addpath(genpath('/home/karl/toolboxes/'));
          repoPath = '/home/karl/pupilShadow/';
         basePath = '/home/karl/Dropbox/OpticFlowProject/Data';
+%          basePath = '/media/karl/44CD-7F85/OpticFlowProject/Data';
 end
 
 addpath(genpath(repoPath))
@@ -34,7 +36,7 @@ addpath(genpath(repoPath))
 
 numSubs = 3;
 numConds = 2;
-for subNum = 1:3
+for subNum = 2:3
     
     switch subNum
         case 1
@@ -44,7 +46,7 @@ for subNum = 1:3
         case 3
             sessionID = '2018-01-31_JAW';
         case 4
-            sessionID = '2019-02-27_JSM';
+            sessionID = '2019-03-07_JPL';
     end
     
     

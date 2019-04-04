@@ -59,7 +59,7 @@ if useEye(2), defaultSplit = [defaultSplit, lEyeData]; end
 
 
 defaultTranslateAndRotate = {'comXYZ'}';
-defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
+defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
 rEyeData = {'rGazeGroundIntersection','rEyeballCenterXYZ','rGazeXYZ'};
 lEyeData = {'lGazeGroundIntersection', 'lEyeballCenterXYZ','lGazeXYZ'};
 if useEye(1), defaultTranslateAndRotate = [defaultTranslateAndRotate, rEyeData]; end

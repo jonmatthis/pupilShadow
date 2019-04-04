@@ -151,14 +151,42 @@ switch sessionID
                 
         end
         
-    case '2019-02-27_JSM'
-        sesh.subID = 'JSM';
+    case '2019-03-07_JPL'
+        sesh.subID = 'JPL';
         sesh.legLength = 950; %right ASIS to right Medial Maleolus
         sesh.bodyMass = 84.1; %kg
         sesh.height = 1776; %mm
         switch condID
             
-            
+            case 'Woodchips'
+                sesh.shadowTakeName = 'take0001'; %shadow Take#
+                sesh.pupilExportDir = '000';
+                
+                %%%NOTE THAT THESE FRAME NUMBERS CORRESPOND TO FRAME#'S
+                %%%*AFTER* RESAMPLING
+                sesh.vorFrames = [1200:6100]; %frames where sub is VORing (Pupil Frames)
+                sesh.calibFrame =  sesh.vorFrames(1); %frame where sub is lookin good at the primary calibration marker real good
+                
+                sesh.walks = [ ...
+                    10733       12392
+                    12820       14318
+                    14889       16352
+                    16780       18278
+                    21574       44361
+                    46639      68287
+                    72844      94492
+                    95176       119330
+                    133002      154422
+                    158979      179716
+                    184495      185984
+                    186281      187670
+                    188042      189555
+                    189952      191291];
+                
+                sesh.trialType = {'Frisbee';'Frisbee';'Frisbee';'Frisbee';...
+                    'Free'; 'Ground'; 'Fix'; 'Free'; 'Ground'; 'Fix';...
+                    'Frisbee';'Frisbee';'Frisbee';'Frisbee'};
+                
             case 'Rocks'
                 sesh.shadowTakeName = 'take0002'; %shadow Take#
                 sesh.pupilExportDir = '000';
