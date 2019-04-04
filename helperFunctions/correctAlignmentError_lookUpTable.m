@@ -58,6 +58,7 @@ while stillLooking
         %center camXYZ on comXYZ (comXYZ reference frame
         c_z(:,1) = eyeCenterXYZ(:,1)-comXYZ(:,1);
         c_z(:,2) = eyeCenterXYZ(:,3)-comXYZ(:,3);
+                
         
         [gTheta, gRho] = cart2pol(g_z(:,1), g_z(:,2));
         [g_z(:,1), g_z(:,2)] = pol2cart(gTheta-corrAlignTheta, gRho); %rotate by -CorrAlignTheta
@@ -73,21 +74,23 @@ while stillLooking
         eyeCenterXYZ(:,1) = c_z(:,1)+comXYZ(:,1);
         eyeCenterXYZ(:,3) = c_z(:,2)+comXYZ(:,3);
         
-        if iter == 1 %rotate head vectors
-            
-            [headXtheta, headXrho] = cart2pol(headVecX(:,1), headVecX(:,3));
-            [headVecX(:,1), headVecX(:,3)] = pol2cart(headXtheta-corrAlignTheta, headXrho); %rotate by -CorrAlignTheta
-            
-            [headYtheta, headYrho] = cart2pol(headVecY(:,1), headVecY(:,3));
-            [headVecY(:,1), headVecY(:,3)] = pol2cart(headYtheta-corrAlignTheta, headYrho); %rotate by -CorrAlignTheta
-            
-            [headZtheta, headZrho] = cart2pol(headVecZ(:,1), headVecZ(:,3));
-            [headVecZ(:,1), headVecZ(:,3)] = pol2cart(headZtheta-corrAlignTheta, headZrho); %rotate by -CorrAlignTheta
-            
-            thisWalk_fixed.headVecX_fr_xyz = headVecX;
-            thisWalk_fixed.headVecY_fr_xyz = headVecY;
-            thisWalk_fixed.headVecZ_fr_xyz = headVecZ;
-        end
+%         if iter == 1 %rotate head vectors
+%             
+%             
+% 
+%             [headXtheta, headXrho] = cart2pol(headVecX(:,1), headVecX(:,3));
+%             [headVecX(:,1), headVecX(:,3)] = pol2cart(headXtheta-corrAlignTheta, headXrho); %rotate by -CorrAlignTheta
+%             
+%             [headYtheta, headYrho] = cart2pol(headVecY(:,1), headVecY(:,3));
+%             [headVecY(:,1), headVecY(:,3)] = pol2cart(headYtheta-corrAlignTheta, headYrho); %rotate by -CorrAlignTheta
+%             
+%             [headZtheta, headZrho] = cart2pol(headVecZ(:,1), headVecZ(:,3));
+%             [headVecZ(:,1), headVecZ(:,3)] = pol2cart(headZtheta-corrAlignTheta, headZrho); %rotate by -CorrAlignTheta
+%             
+%             thisWalk_fixed.headVecX_fr_xyz = headVecX;
+%             thisWalk_fixed.headVecY_fr_xyz = headVecY;
+%             thisWalk_fixed.headVecZ_fr_xyz = headVecZ;
+%         end
         
         
         % recalculate ground fixations
