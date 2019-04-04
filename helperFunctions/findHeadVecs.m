@@ -28,10 +28,9 @@ headYCalib_XYZ_z = normr(hTop(calibFrame,:)- hCenCalib); %  Head Y is just the t
 headZCalib_XYZ_z = cross(headCalib_vec,headYCalib_XYZ_z); % Head Z is coming out of the right of the head
 headXCalib_XYZ_z = cross(headYCalib_XYZ_z,headZCalib_XYZ_z); %define head X based on head Y and Z
 
-headVecScale = 1;
-headXCalib_XYZ_z = headXCalib_XYZ_z *headVecScale;
-headYCalib_XYZ_z = headYCalib_XYZ_z *headVecScale;
-headZCalib_XYZ_z = headZCalib_XYZ_z *headVecScale;
+headXCalib_XYZ_z = normr(headXCalib_XYZ_z);
+headYCalib_XYZ_z = normr(headYCalib_XYZ_z);
+headZCalib_XYZ_z = normr(headZCalib_XYZ_z);
 
 %%%make sure head vectors are orthogonal
 assert(dot(headXCalib_XYZ_z,headYCalib_XYZ_z) + dot(headXCalib_XYZ_z,headZCalib_XYZ_z) + dot(headZCalib_XYZ_z,headYCalib_XYZ_z) < eps*10, 'Your head vectors arent othogonal')
