@@ -21,6 +21,9 @@ function [porX_ds porY_ds] = downsamplegaze(norm_pos_x, norm_pos_y, index, heigh
 
 %% Downsample by taking mean of all eye positions on a given world-camera frame
 
+porX = nan(size(0:max(index)));
+porY = nan(size(0:max(index)));
+
 for ii=0:max(index)
         
     if mod(ii, 1000) == 0 

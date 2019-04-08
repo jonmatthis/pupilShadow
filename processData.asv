@@ -270,15 +270,8 @@ headRotMat_row_col_fr = headGlobalQuat_wxyz.RotationMatrix;
 %% find head vecotrs
 [ headVecX_fr_xyz, headVecY_fr_xyz, headVecZ_fr_xyz] = findHeadVecs(headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames,  calibFrame, calibPoint, vorFrames);
 
-basisX = nan(length(headGlobalQuat_wxyz), 3);
-basisY = basisX;
-basisZ = basisX;
-
 for ii = 1:length(headGlobalQuat_wxyz)
-   if mod(ii,1000)==0
-       disp(['making basis vectors, frame: ' num2str(ii) ' of ' length(headGlobalQuat_wxyz)])
-   end
-   
+   ii
     basisX(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[1;0;0];
     basisY(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[0;1;0];
     basisZ(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[0;0;1];
