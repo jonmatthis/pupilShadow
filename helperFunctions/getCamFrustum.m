@@ -1,4 +1,4 @@
-function [patchTopLeft patchBottomLeft patchBottomRight patchTopRight] = getCamFrustum(headVecX_fr_xyz,headVecY_fr_xyz,headVecZ_fr_xyz,gaze_norm_pos_x,gaze_norm_pos_y,...
+function [patchTopLeft, patchBottomLeft, patchBottomRight, patchTopRight] = getCamFrustum(headVecX_fr_xyz,headVecY_fr_xyz,headVecZ_fr_xyz,gaze_norm_pos_x,gaze_norm_pos_y,...
     px2mmScale,calibDist,rGazeXYZ,lGazeXYZ,rEyeballCenterXYZ,lEyeballCenterXYZ,resHeight,resWidth,shadow_fr_mar_dim, calibFrame, calibPoint, vorFrames,shadowMarkerNames)
 
 porX = gaze_norm_pos_x*resWidth;
@@ -58,8 +58,11 @@ bz = normr(headVecZ_fr_xyz);
         
         % optimize to search for rotation angles
         save('gpp.mat','p1','p2');
+        opts = optimset('Display', 'iter','TolX',1e-9,'TolFun',1e-9,'DiffMinChange',1e-6);
         x0 = zeros(3,1);
-        x = fminsearch(@errFunPoints,x0);
+
+        lossFunction = @(x) errFunPoints(p1, p2, x);
+        x = fminunc(lossFunction,x0,opts);
         
         % camera to head rotation matrix
         R2 = eul2rotm(x');
@@ -78,13 +81,13 @@ bz = normr(headVecZ_fr_xyz);
         for ii = 1:length(bx)
             R1 = [bx(ii,:)' by(ii,:)' bz(ii,:)'];
             
-            frust(:,:,ii) = (R1*R2*frust_pre')';
+            frustum(:,:,ii) = (R1*R2*frust_pre')';
         end
 
-        patchTopLeft = squeeze(frust(1,:,:))';
-        patchBottomLeft = squeeze(frust(2,:,:))';
-        patchBottomRight = squeeze(frust(3,:,:))';
-        patchTopRight = squeeze(frust(4,:,:))';
+        patchTopLeft = squeeze(frustum(2,:,:))';
+        patchBottomLeft = squeeze(frustum(1,:,:))';
+        patchBottomRight = squeeze(frustum(4,:,:))';
+        patchTopRight = squeeze(frustum(3,:,:))';
         
     %% play a video of the VOR frames, if it comes to that
 
@@ -113,7 +116,7 @@ debugVid = true;
 if debugVid
     
     figure(91836)
-    clf
+    
     sphRes = 20;
     r = ones(sphRes, sphRes);
     [th, phi] = meshgrid(linspace(0, 2*pi, sphRes), linspace(-pi, pi, sphRes));
@@ -129,7 +132,7 @@ if debugVid
     for fr = vorFrames(1)
 
 %     for fr = vorFrames(1):10:vorFrames(end)
-        
+        clf
         hx = hCen(fr,1);
         hy = hCen(fr,2);
         hz = hCen(fr,3);
@@ -163,7 +166,10 @@ if debugVid
         line([0 patchBottomLeft(fr,1)]+hx, [0 patchBottomLeft(fr,2)]+hy, [0 patchBottomLeft(fr,3)]+hz,'color','k','linewidth',2);
         line([0 patchBottomRight(fr,1)]+hx, [0 patchBottomRight(fr,2)]+hy, [0 patchBottomRight(fr,3)]+hz,'color','k','linewidth',2);
  
-        
+        thisFrustum = frustum(:,:,fr);
+        thisFrustum(end+1,:) = thisFrustum(1,:);
+        plot3(thisFrustum(:,1)+hx, thisFrustum(:,2)+hy, thisFrustum(:,3)+hz,'r-o','LineWidth',3)
+
         plot3(calibPoint(1), calibPoint(2), calibPoint(3), 'kp')
         %     surface(x1+hx,y1+hy,z1+hz,'FaceColor', 'none','EdgeColor',[.9 .9 .9])
         bx =   shadow_fr_mar_dim(fr,1,1);
@@ -173,7 +179,7 @@ if debugVid
         [xx,zz] = meshgrid(-2000+bx:100:2000+bx, -2500+bz:100:2000+bz);
         surface(xx,zeros(size(xx)),zz,'FaceColor','w')
         
-        axis([-2000+bx 2000+bx -2000+by 2000+by -2500+bz 2000+bz])
+        axis([-4000+bx 4000+bx -4000+by 4000+by -4500+bz 4000+bz])
         
         view(-173, -43);
         axis equal
@@ -181,7 +187,6 @@ if debugVid
         set(gca,'CameraUpVector',[0 1 0])
         xlabel('x');ylabel('y'); zlabel('z');
         
-        hold off
         drawnow
     end
 end

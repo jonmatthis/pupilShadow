@@ -54,10 +54,10 @@ for subNum = 1:3
     for condNum = 1:numConds
         
         switch condNum
-            case 2
-                takeID = 'Woodchips';
             case 1
                 takeID = 'Rocks';
+            case 2
+                takeID = 'Woodchips';
         end
         
         sessionPath = [basePath filesep sessionID];

@@ -33,6 +33,7 @@ for ii=0:max(index)
     if ~isempty(find(index==ii))
         porX(ii)=mean(norm_pos_x(index==ii));
         porY(ii)=mean(norm_pos_y(index==ii));
+
     end
 end
 

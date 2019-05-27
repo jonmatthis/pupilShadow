@@ -49,7 +49,7 @@ if useEye(1), defaultTransfer = [defaultTransfer, rEyeData]; end
 if useEye(2), defaultTransfer = [defaultTransfer, lEyeData]; end
 
 
-defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex','headGlobalQuat_wxyz'};
+defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex','headGlobalQuat_wxyz', 'shortTermHeading_normPosX', 'shortTermHeading_normPosY', 'longTermHeading_normPosX', 'longTermHeading_normPosY', 'headGyroXYZ'};
 lEyeData = {'lEye.theta','lEye.phi','lEye.norm_pos_x',...
     'lEye.norm_pos_y','lEye.circle_3d_radius','lEye.blinks'};
 rEyeData = {'rEye.theta','rEye.phi','rEye.norm_pos_x',...
@@ -59,7 +59,7 @@ if useEye(2), defaultSplit = [defaultSplit, lEyeData]; end
 
 
 defaultTranslateAndRotate = {'comXYZ'}';
-defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','patchTopLeft','patchTopRight','patchBottomLeft','patchBottomRight'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
+defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','patchTopLeft','patchTopRight','patchBottomLeft','patchBottomRight','headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
 rEyeData = {'rGazeGroundIntersection','rEyeballCenterXYZ','rGazeXYZ'};
 lEyeData = {'lGazeGroundIntersection', 'lEyeballCenterXYZ','lGazeXYZ'};
 if useEye(1), defaultTranslateAndRotate = [defaultTranslateAndRotate, rEyeData]; end
@@ -193,16 +193,17 @@ for ww = 1:size(walk_names,1)
     
     thisWalk.hCenXYZ = (thisWalk.hTopXYZ + thisWalk.headXYZ)/2;
     %% rotate step data
-    disp('Rotating Steps...')
-    theseStepIDs = steps_HS_TO_StanceLeg_XYZ(:,1)>=walks(ww,1) & steps_HS_TO_StanceLeg_XYZ(:,1)<=walks(ww,2);
-    thisWalk.steps_HS_TO_StanceLeg_XYZ = steps_HS_TO_StanceLeg_XYZ(theseStepIDs,:);
-    thisWalk.steps_HS_TO_StanceLeg_XYZ(:, [4,6]) = thisWalk.steps_HS_TO_StanceLeg_XYZ(:, [4,6]) - origin([1 3]); %zero data
-    X = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,4); %original X
-    Z = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,6); %original Z (Y)
-    [x_r, z_r] = rotateFromV0toV1(X, Z, pt0, pt1, origin([1 3]),0 );
-    thisWalk.steps_HS_TO_StanceLeg_XYZ(:,4:6) = [x_r' thisWalk.steps_HS_TO_StanceLeg_XYZ(:,5) z_r'];
-    thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) - walks(ww,1);
-    
+    if ~strcmp(thisWalk.name, 'vor')
+        disp('Rotating Steps...')
+        theseStepIDs = steps_HS_TO_StanceLeg_XYZ(:,1)>=walks(ww,1) & steps_HS_TO_StanceLeg_XYZ(:,1)<=walks(ww,2);
+        thisWalk.steps_HS_TO_StanceLeg_XYZ = steps_HS_TO_StanceLeg_XYZ(theseStepIDs,:);
+        thisWalk.steps_HS_TO_StanceLeg_XYZ(:, [4,6]) = thisWalk.steps_HS_TO_StanceLeg_XYZ(:, [4,6]) - origin([1 3]); %zero data
+        X = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,4); %original X
+        Z = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,6); %original Z (Y)
+        [x_r, z_r] = rotateFromV0toV1(X, Z, pt0, pt1, origin([1 3]),0 );
+        thisWalk.steps_HS_TO_StanceLeg_XYZ(:,4:6) = [x_r' thisWalk.steps_HS_TO_StanceLeg_XYZ(:,5) z_r'];
+        thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) = thisWalk.steps_HS_TO_StanceLeg_XYZ(:,1:2) - walks(ww,1);
+    end
     %% add unrotated split data
     for dd = 1:length(data_to_split)
         varName = data_to_split{dd};

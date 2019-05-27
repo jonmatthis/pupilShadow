@@ -98,7 +98,7 @@ end
 gaze.index = knnsearch(worldUnixTimestamp,gaze.unixTimestamp);
 
 %% Load Shadow Data - SHADOW ONLY
-disp('Loading Shadow Data ...')
+disp('Loading Spooky Shadow Skeleton Data ...')
 
 streamFilename = [shadowDataPath, filesep, shadowTakeName, '_stream.csv'];
 streamData = readtable(streamFilename);  % this is way better than importdata because it auto fills some stuff for us
@@ -219,7 +219,26 @@ wRaw.avg_fps = mean(diff(syncedUnixTime).^-1);
 %SHADOW ONLY
 disp('Fixing Skateboards')
 [shadow_fr_mar_dim] = fixSkateboarding_kb(wRaw, allSteps_HS_TO_StanceLeg);
-comXYZ = squeeze(shadow_fr_mar_dim(:,1,:));
+
+%% Clean up Ol Mr Skeleton. Butter im up, and pin im to the floor
+% % get l/r heel information
+% rHeelXYZ = squeeze(shadowRAW_fr_mar_dim(:,strcmp('RightHeel', shadowMarkerNames),:)); % pull out lHeel marker
+% lHeelXYZ = squeeze(shadowRAW_fr_mar_dim(:,strcmp('LeftHeel', shadowMarkerNames),:)); % pull out lHeel marker
+% 
+% grHeight = min([rHeelXYZ(2) lHeelXYZ(2) ]); %the Y values denote vertical position
+% clear rHeelXYZ lHeelXYZ
+% 
+%     for mm = 1:length(shadowRAW_fr_mar_dim(1,:,1))
+%         shadow_fr_mar_dim(:,mm,2) =  shadow_fr_mar_dim(:,mm,2)  - grHeight; %pin skeleton the floor by ensuring that lowest heel marker has 0 height
+%     end
+% 
+%     order = 4;
+%     cutoff = 10;
+%     for mm = 1:length(shadow_fr_mar_dim(1,:,1))
+%         shadow_fr_mar_dim(:,mm,:) = butterLowZero(order, cutoff, framerate, shadow_fr_mar_dim(:,mm,:)); %butter im up. 4th order, zero lag butterworth with a 10Hzcutoff
+%     end
+%     
+    comXYZ = squeeze(shadow_fr_mar_dim(:,1,:));
 
 %% build step_TO_HS_ft_XYZ variable
 % SHADOW ONLY
@@ -259,7 +278,22 @@ headGlobalQuat_wxyz = normalize(quaternion(HeadGqw, HeadGqx, HeadGqy, HeadGqz));
 
 headRotMat_row_col_fr = headGlobalQuat_wxyz.RotationMatrix;
 
+%% Pull out head/chest/hips acceleration
+ 
+headAccXYZ = [shadowDataTrimmed.Head_lax, shadowDataTrimmed.Head_lay, shadowDataTrimmed.Head_laz];
+chestAccXYZ = [shadowDataTrimmed.Chest_lax, shadowDataTrimmed.Chest_lay, shadowDataTrimmed.Chest_laz];
+hipsAccXYZ = [shadowDataTrimmed.Hips_lax, shadowDataTrimmed.Hips_lay, shadowDataTrimmed.Hips_laz];
+ 
 
+headGyroXYZ = [shadowDataTrimmed.Head_gx, shadowDataTrimmed.Head_gy, shadowDataTrimmed.Head_gz];
+
+figure
+plot(headAccXYZ,'.-')
+hold on
+% plot([hs hs]',[ones(size(hs))-10 ones(size(hs))+10]','r')
+xlim([2e4 2.1e4])
+ylim([-1 1])
+title([sessionID ' - ' takeID])
 %% find eye positions in Shadow reference frame - BOTH
 [ rEyeballCenterXYZ, lEyeballCenterXYZ,worldCamCenterXYZ ] = findEyePositions(headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames,  calibFrame);
 
@@ -276,7 +310,7 @@ basisZ = basisX;
 
 for ii = 1:length(headGlobalQuat_wxyz)
    if mod(ii,1000)==0
-       disp(['making basis vectors, frame: ' num2str(ii) ' of ' length(headGlobalQuat_wxyz)])
+       disp(['making basis vectors, frame: ' num2str(ii) ' of ' num2str(length(headGlobalQuat_wxyz))])
    end
    
     basisX(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[1;0;0];
@@ -435,12 +469,24 @@ end
 %% get cam frustum
 
 
-[patchTopLeft patchBottomLeft patchBottomRight patchTopRight]  = getCamFrustum(headVecX_fr_xyz,headVecY_fr_xyz,headVecZ_fr_xyz,gaze.norm_pos_x,gaze.norm_pos_y,...
+[patchTopLeft, patchBottomLeft, patchBottomRight, patchTopRight]  = getCamFrustum(headVecX_fr_xyz,headVecY_fr_xyz,headVecZ_fr_xyz,gaze.norm_pos_x,gaze.norm_pos_y,...
     px2mmScale,calibDist,rGazeXYZ,lGazeXYZ,rEyeballCenterXYZ,lEyeballCenterXYZ,resHeight,resWidth,shadow_fr_mar_dim, calibFrame, calibPoint, vorFrames,shadowMarkerNames);
 
+%% find headling location in normalized screen coordinates
 
+hData.shadow_fr_mar_dim          = shadow_fr_mar_dim;
+hData.patchTopLeft               = patchTopLeft;
+hData.patchBottomLeft            = patchBottomLeft;
+hData.patchBottomRight           = patchBottomRight;
+hData.patchTopRight              = patchTopRight;
+hData.resWidth                   = resWidth;
+hData.resHeight                  = resHeight;
+hData.steps_HS_TO_StanceLeg_XYZ  = steps_HS_TO_StanceLeg_XYZ;
+hData.walks                      = sesh.walks;
+hData.shadowMarkerNames          = shadowMarkerNames;
+hData.framerate                  = framerate;
 
-
+[shortTermHeading_normPosX,shortTermHeading_normPosY, longTermHeading_normPosX,longTermHeading_normPosY] = findHeadingInPixels(hData);
 
 %% Save out all the variables
 if ~exist(outputPath,'file')
