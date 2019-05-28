@@ -227,6 +227,12 @@ function [corrAlignTheta] = corrAlignLookup(sessionID, takeID, ww)
 corrAlignTheta = nan;
 
 switch sessionID
+    case 'PreCalgaryTest'
+        switch takeID
+            case 'test'
+                corrTable_ww = [.075]; % start with the same number of 'nan's' as there are 'walks', fill them in with the 'right' alignment theta            
+        end
+        
     case '2018-01-23_JSM'
         switch takeID
             case 'Woodchips'

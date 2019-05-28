@@ -9,6 +9,8 @@ shadowMarkerNames = w.shadowMarkerNames;
 avg_fps = mean(w.avg_fps);
 % walks = w.walks;
 
+%step finding algorithm based on Zeni 2009
+
 % The basic idea is to first situate the data by subtracting the x & y
 % coordinates of the Root marker from each marker position at each frame,
 % essentially setting the origin to the subject's root.
@@ -528,16 +530,18 @@ for i = 1:length(allSteps_HS_TO_StanceLeg)-1
     ssp(i) = allSteps_HS_TO_StanceLeg(i+1,1)- allSteps_HS_TO_StanceLeg(i,2);
 end
 
-figure(3432432)
+figure(3432432);clf
 title('Step Durations')
-plot(diff(allSteps_HS_TO_StanceLeg(:,1)),'-p');
+plot(diff(allSteps_HS_TO_StanceLeg(:,1))/avg_fps,'-p');
 hold on
-plot(ssp,'-v')
-plot(diff(allSteps_HS_TO_StanceLeg(:,[1 2]),1,2),'-o')
-plot(allSteps_HS_TO_StanceLeg(:,3),'-s')
+plot(ssp/avg_fps,'-v')
+plot(diff(allSteps_HS_TO_StanceLeg(:,[1 2]),1,2)/avg_fps,'-o')
+plot(allSteps_HS_TO_StanceLeg(:,3)/10,'-s')
 
-legend('Full Step (HS-HS)',  'SingleSupport (TO-HS)', 'DoubleSupport( HS-TO)','StanceLeg (1=R, 2=L)')
-ylim([0, 100])
+legend('Full Step (HS-HS)',  'SingleSupport (TO-HS)', 'DoubleSupport( HS-TO)','StanceLeg (.1=R, .2=L)')
+ylabel('sec')
+xlabel('step#')
+ylim([0, 1])
 hold off
 
 

@@ -42,7 +42,7 @@ load(fn);
 
 %% process optional function parameters
 defaultTransfer = { 'sessionID','takeID', 'subID', 'shadowMarkerNames', 'processData_date',...
-    'framerate', 'legLength','calibDist', 'px2mmScale'};
+    'framerate', 'legLength','calibDist', 'px2mmScale','shadowVersion'};
 lEyeData = {'lVorCalibErr'};
 rEyeData = {'rVorCalibErr'};
 if useEye(1), defaultTransfer = [defaultTransfer, rEyeData]; end
@@ -235,8 +235,9 @@ for ww = 1:size(walk_names,1)
     if ~strcmp(walk_names{ww},'vor')
         figure(sum(double(sessionID))+sum(double(takeID))) %dumb way to get a unique number for each session/take combo
         
+        if length(walks(:,1)) > 1
         subplot(round(length(walks(2:end,:))/2),2,ww)
-        
+        end
         
         hold on
         plot(thisWalk.rGazeGroundIntersection(:,1), thisWalk.rGazeGroundIntersection(:,3),'r.')

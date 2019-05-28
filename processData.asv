@@ -422,8 +422,7 @@ if useEye(2)
     vData.lHeelXYZ              = lHeelXYZ(vorFrames,:);
     vData.shadowMarkerNames     = shadowMarkerNames;
     vData.plotDebug             = true;
-        vData.shadowVersion         = shadowVersion; 
-
+    
     vorAlignLossFun = @(camAlignEulerGuess) vorPupilAlignErrFun_eyeCam(vData, camAlignEulerGuess);
     
     initialCamEulerGuess = [0 0 0]; %starting guess for camAlignRotMat
@@ -525,7 +524,7 @@ end
 
 
 [patchTopLeft, patchBottomLeft, patchBottomRight, patchTopRight]  = getCamFrustum(headVecX_fr_xyz,headVecY_fr_xyz,headVecZ_fr_xyz,gaze.norm_pos_x,gaze.norm_pos_y,...
-    px2mmScale,calibDist,rGazeXYZ,lGazeXYZ,rEyeballCenterXYZ,lEyeballCenterXYZ,resHeight,resWidth,shadow_fr_mar_dim, calibFrame, calibPoint, vorFrames,shadowMarkerNames, shadowVersion);
+    px2mmScale,calibDist,rGazeXYZ,lGazeXYZ,rEyeballCenterXYZ,lEyeballCenterXYZ,resHeight,resWidth,shadow_fr_mar_dim, calibFrame, calibPoint, vorFrames,shadowMarkerNames);
 
 if spotCheck; keyboard; end
 

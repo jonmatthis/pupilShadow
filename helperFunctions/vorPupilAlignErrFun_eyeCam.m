@@ -24,6 +24,8 @@ lHeelXYZ = vData.lHeelXYZ;
 calibPoint = vData.calibPoint;
 
 confidence = vData.confidence;
+shadowVersion = vData.shadowVersion;
+
 %Recipe for a gaze vector!
 gazeXYZ = [eye_pupCircCen_x eye_pupCircCen_y eye_pupCircCen_z] ...  Take your "PupilCircleCenter" (in 3D Eye camera coordinate system, units are mm)
     -[eye_sphCenCam_x  eye_sphCenCam_y  eye_sphCenCam_z];        %Subtract EyeSphereCenter (in eye camera coordiates) >> Origin is now at the center of the EyeSphere in camera coords
@@ -97,12 +99,23 @@ if vData.plotDebug
     normScale = 1;
     plotSkel = true;
     
+
+if shadowVersion == 2
     lLeg = [2 3 4 5 6 7 5];
     rLeg = [2 8 9 10 11 12 10];
     tors = [2 13 14 15 26 27 28];
     lArm = [15 16 17 26 17 18 19 20];
     rArm = [15 21 22 26 22 23 24 25];
-    
+numMarkers = 28;
+elseif shadowVersion == 3    
+    lLeg = [2 9 10 11 14 12 13 12 11];
+    rLeg = [2 3 4  5  8  6  7  6  5];
+    tors = [2 15 16 17 30 31 32];
+    lArm = [17 24 25 30 25 26 27 28 29];
+    rArm = [17 18 19 30 19 20 21 22 23];
+    numMarkers = 32;
+end
+
     
     figure(987)
     
@@ -173,7 +186,7 @@ if vData.plotDebug
         plot3(calibPoint(1), calibPoint(2), calibPoint(3), 'hr', 'MarkerFaceColor','r','MarkerSize',12)
         
         %%%Plotcherself a skeleetoon
-        plot3(shadow_fr_mar_dim(ii,1:28,1),shadow_fr_mar_dim(ii,1:28,2),shadow_fr_mar_dim(ii,1:28,3),'ko','MarkerFaceColor','k','MarkerSize',4)
+        plot3(shadow_fr_mar_dim(ii,1:numMarkers,1),shadow_fr_mar_dim(ii,1:numMarkers,2),shadow_fr_mar_dim(ii,1:numMarkers,3),'ko','MarkerFaceColor','k','MarkerSize',4)
         hold on
         
         

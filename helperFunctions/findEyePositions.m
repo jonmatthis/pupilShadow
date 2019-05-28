@@ -1,4 +1,4 @@
-function [ rEyeballCenterXYZ, lEyeballCenterXYZ, worldCamCenterXYZ ] = findEyePositions( headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames, calibFrame)
+function [ rEyeballCenterXYZ, lEyeballCenterXYZ, worldCamCenterXYZ ] = findEyePositions( headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames, calibFrame,shadowVersion)
 %FINDSCENECAMERAPOSITION calculate the location oof the eyeballs relative
 %to subject's head markers. This is the point from which the gaze vectors should
 %originate.
@@ -296,11 +296,21 @@ r = ones(sphRes, sphRes);
 [x1,y1,z1] = sph2cart(th, phi, r);
 
 
-lLeg = [2 3 4 5 6 7 5];
-rLeg = [2 8 9 10 11 12 10];
-tors = [2 13 14 15 26 27 28];
-lArm = [15 16 17 26 17 18 19 20];
-rArm = [15 21 22 26 22 23 24 25];
+if shadowVersion == 2
+    lLeg = [2 3 4 5 6 7 5];
+    rLeg = [2 8 9 10 11 12 10];
+    tors = [2 13 14 15 26 27 28];
+    lArm = [15 16 17 26 17 18 19 20];
+    rArm = [15 21 22 26 22 23 24 25];
+numMarkers = 28;
+elseif shadowVersion == 3    
+    lLeg = [2 9 10 11 14 12 13 12 11];
+    rLeg = [2 3 4  5  8  6  7  6  5];
+    tors = [2 15 16 17 30 31 32];
+    lArm = [17 24 25 30 25 26 27 28 29];
+    rArm = [17 18 19 30 19 20 21 22 23];
+    numMarkers = 32;
+end
 
  ii = calibFrame;
     
@@ -308,7 +318,7 @@ rArm = [15 21 22 26 22 23 24 25];
     hy = hTop(ii,2);
     hz = hTop(ii,3);
     
-    plot3(shadow_fr_mar_dim(ii,1:28,1),shadow_fr_mar_dim(ii,1:28,2),shadow_fr_mar_dim(ii,1:28,3),'ko','MarkerFaceColor','k','MarkerSize',4)
+    plot3(shadow_fr_mar_dim(ii,1:numMarkers,1),shadow_fr_mar_dim(ii,1:numMarkers,2),shadow_fr_mar_dim(ii,1:numMarkers,3),'ko','MarkerFaceColor','k','MarkerSize',4)
     hold on
     
     

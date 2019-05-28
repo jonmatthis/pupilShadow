@@ -1,4 +1,4 @@
-function [ headVecX_fr_xyz, headVecY_fr_xyz, headVecZ_fr_xyz]  = findHeadVecs( headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames, calibFrame, calibPoint, vorFrames)
+function [ headVecX_fr_xyz, headVecY_fr_xyz, headVecZ_fr_xyz]  = findHeadVecs( headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames, calibFrame, calibPoint, vorFrames, shadowVersion)
 %FIND HEAD VECS
 %
 % Find head orientation vectors
@@ -86,18 +86,28 @@ debug = true;
 if debug
     % Debug Plot
     
-    figure(5432)
+    figure(5432);clf
     sphRes = 20;
     r = ones(sphRes, sphRes);
     [th, phi] = meshgrid(linspace(0, 2*pi, sphRes), linspace(-pi, pi, sphRes));
     [x1,y1,z1] = sph2cart(th, phi, r);
     
-    
-    lLeg = [2 3 4 5 6 7 5];
-    rLeg = [2 8 9 10 11 12 10];
-    tors = [2 13 14 15 26 27 28];
-    lArm = [15 16 17 26 17 18 19 20];
-    rArm = [15 21 22 26 22 23 24 25];
+    if shadowVersion == 2
+        lLeg = [2 3 4 5 6 7 5];
+        rLeg = [2 8 9 10 11 12 10];
+        tors = [2 13 14 15 26 27 28];
+        lArm = [15 16 17 26 17 18 19 20];
+        rArm = [15 21 22 26 22 23 24 25];
+        numMarkers = 28;
+    elseif shadowVersion == 3
+        lLeg = [2 9 10 11 14 12 13 12 11];
+        rLeg = [2 3 4  5  8  6  7  6  5];
+        tors = [2 15 16 17 30 31 32];
+        lArm = [17 24 25 30 25 26 27 28 29];
+        rArm = [17 18 19 30 19 20 21 22 23];
+        numMarkers = 32;
+    end
+
     
     i = calibFrame;
     
@@ -105,7 +115,7 @@ if debug
     hy = hCen(i,2);
     hz = hCen(i,3);
     
-    plot3(shadow_fr_mar_dim(i,1:28,1),shadow_fr_mar_dim(i,1:28,2),shadow_fr_mar_dim(i,1:28,3),'ko','MarkerFaceColor','k','MarkerSize',4)
+    plot3(shadow_fr_mar_dim(i,1:numMarkers,1),shadow_fr_mar_dim(i,1:numMarkers,2),shadow_fr_mar_dim(i,1:numMarkers,3),'ko','MarkerFaceColor','k','MarkerSize',4)
     hold on
     
     
@@ -185,12 +195,21 @@ r = ones(sphRes, sphRes);
 [th, phi] = meshgrid(linspace(0, 2*pi, sphRes), linspace(-pi, pi, sphRes));
 [x1,y1,z1] = sph2cart(th, phi, r);
 
-
-lLeg = [2 3 4 5 6 7 5];
-rLeg = [2 8 9 10 11 12 10];
-tors = [2 13 14 15 26 27 28];
-lArm = [15 16 17 26 17 18 19 20];
-rArm = [15 21 22 26 22 23 24 25];
+    if shadowVersion == 2
+        lLeg = [2 3 4 5 6 7 5];
+        rLeg = [2 8 9 10 11 12 10];
+        tors = [2 13 14 15 26 27 28];
+        lArm = [15 16 17 26 17 18 19 20];
+        rArm = [15 21 22 26 22 23 24 25];
+        numMarkers = 28;
+    elseif shadowVersion == 3
+        lLeg = [2 9 10 11 14 12 13 12 11];
+        rLeg = [2 3 4  5  8  6  7  6  5];
+        tors = [2 15 16 17 30 31 32];
+        lArm = [17 24 25 30 25 26 27 28 29];
+        rArm = [17 18 19 30 19 20 21 22 23];
+        numMarkers = 32;
+    end
 
 fr = calibFrame;
 
@@ -198,7 +217,7 @@ hx = hCen(fr,1);
 hy = hCen(fr,2);
 hz = hCen(fr,3);
 
-plot3(shadow_fr_mar_dim(fr,1:28,1),shadow_fr_mar_dim(fr,1:28,2),shadow_fr_mar_dim(fr,1:28,3),'ko','MarkerFaceColor','k','MarkerSize',4)
+plot3(shadow_fr_mar_dim(fr,1:numMarkers,1),shadow_fr_mar_dim(fr,1:numMarkers,2),shadow_fr_mar_dim(fr,1:numMarkers,3),'ko','MarkerFaceColor','k','MarkerSize',4)
 hold on
 
 
