@@ -15,7 +15,7 @@ function[] = processData(sessionID,takeID,sessionPath,useEye,sesh)
 %    session being split. (TODO: write down exactly what info it must have)
 
 
-spotCheck = true; %pause code at each processing step
+spotCheck = false; %pause code at each processing step
 
 processData_date = datetime;
 outputPath = [sessionPath, filesep, 'OutputFiles'];
