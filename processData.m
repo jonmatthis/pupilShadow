@@ -145,7 +145,7 @@ streamData.timestamp = streamData.Head_time;  % shadow V2
  if spotCheck; keyboard; end
 %% Find ShadoUnixStartTime - SHADOW ONLY
 
-takeStruct = xml2struct([shadowDataPath, filesep,'take.mTake']); % turns out '.mTake' files are just secret XML's!! :O
+takeStruct = xml2struct([shadowDataPath,'take.mTake']); % turns out '.mTake' files are just secret XML's!! :O
 shadowStartDateTime = takeStruct.take.start;
 t = strsplit(shadowStartDateTime.Text,{'-','T',':','Z'});
 shadowStartDateTime = datetime(str2num(t{1}),...
@@ -346,25 +346,7 @@ title([sessionID ' - head acceleration - ' takeID])
 
  if spotCheck; keyboard; end
 
-%% find head vecotrs
-[ headVecX_fr_xyz, headVecY_fr_xyz, headVecZ_fr_xyz] = findHeadVecs(headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames,  calibFrame, calibPoint, vorFrames, shadowVersion);
 
-basisX = nan(length(headGlobalQuat_wxyz), 3);
-basisY = basisX;
-basisZ = basisX;
-
-for ii = 1:length(headGlobalQuat_wxyz)
-   if mod(ii,1000)==0
-       disp(['making basis vectors, frame: ' num2str(ii) ' of ' num2str(length(headGlobalQuat_wxyz))])
-   end
-   
-    basisX(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[1;0;0];
-    basisY(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[0;1;0];
-    basisZ(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[0;0;1];
-
-end
-
- if spotCheck; keyboard; end
 
 %% calibrate yr eyeballs !
 % VOR FRAME METHOD - find camera alignment (i.e. the rotations needed for to make gaze vector align with calibration points during vorFrames)
@@ -521,6 +503,27 @@ else
     worldFrameIndex = lEye.index;
 end
 
+
+if isToolboxAvailable('Robotics System Toolbox')
+%% find head vecotrs
+[ headVecX_fr_xyz, headVecY_fr_xyz, headVecZ_fr_xyz] = findHeadVecs(headGlobalQuat_wxyz, shadow_fr_mar_dim, shadowMarkerNames,  calibFrame, calibPoint, vorFrames, shadowVersion);
+
+basisX = nan(length(headGlobalQuat_wxyz), 3);
+basisY = basisX;
+basisZ = basisX;
+
+for ii = 1:length(headGlobalQuat_wxyz)
+   if mod(ii,1000)==0
+       disp(['making basis vectors, frame: ' num2str(ii) ' of ' num2str(length(headGlobalQuat_wxyz))])
+   end
+   
+    basisX(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[1;0;0];
+    basisY(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[0;1;0];
+    basisZ(ii,:) = quat2rotm(headGlobalQuat_wxyz(ii).e')*[0;0;1];
+
+end
+
+ if spotCheck; keyboard; end
 %% get cam frustum
 
 
@@ -546,7 +549,7 @@ hData.framerate                  = framerate;
 [shortTermHeading_normPosX,shortTermHeading_normPosY, longTermHeading_normPosX,longTermHeading_normPosY] = findHeadingInPixels(hData);
 
  if spotCheck; keyboard; end
-
+end
 %% Save out all the variables
 if ~exist(outputPath,'file')
     mkdir(outputPath)

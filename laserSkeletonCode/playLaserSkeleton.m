@@ -206,7 +206,9 @@ groundPlane_color = ones(size(groundPlane_x));
 close all
 figure(1254);clf
 f = gcf;
-f.Position = [1 41 1920 962];
+% f.Position = [1 41 1920 962];
+f.Units = 'normalized';
+f.Position = [0 0 1 1];
 
 t = [];
 

@@ -34,35 +34,23 @@ addpath(genpath(repoPath))
 
 %%
 
-numSubs = 5;
-numConds = 3;
-for subNum = 5;%1:4
+numSubs = 1;
+numConds = 1;
+
+for subNum = 1;%1:4
     
     switch subNum
         case 1
-            sessionID = '2018-01-23_JSM';
-        case 2
-            sessionID = '2018-01-26_JAC';
-        case 3
-            sessionID = '2018-01-31_JAW';
-        case 4
-            sessionID = '2019-03-07_JPL';
-        case 5
-            sessionID = 'PreCalgaryTest';
-            
+            sessionID = '2019-05-29_CalgaryWorkshopData';
     end
     
     
     
-    for condNum = 3;%1:numConds
+    for condNum = 1;%1:numConds
         
         switch condNum
             case 1
-                takeID = 'Rocks';
-            case 2
-                takeID = 'Woodchips';
-            case 3
-                takeID = 'test';
+                takeID = 'Frisbee';
         end
         
         sessionPath = [basePath filesep sessionID];
@@ -82,8 +70,28 @@ for subNum = 5;%1:4
         % walks and walk_names are necessary for splitWalks
         walks = sesh.walks;
         walk_names = repmat({takeID},size(walks,1),1);
-        walk_names{end+1} = 'vor';
+        %         walk_names{end+1} = 'vor';
         splitWalks(sessionPath,takeID,walks,walk_names);
         
+        %% LASER SKELETON!!!!
+        
+        %%add paths to mexopencv
+        assert(exist('C:/dev/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function :`(')
+        addpath('C:/dev/mexopencv')
+        addpath('C:/dev/mexopencv/opencv_contrib/')
+        
+        %load camera parameters
+        camParamPath = [repoPath filesep 'laserSkeletonCode' filesep 'camParam1080_20180626.mat'];
+        load(camParamPath);
+        camParams = cameraParams1080_2;
+        
+        %load allWalks cell array (from 'splitWalks.m')
+        allWalksPath =[sessionPath filesep 'OutputFiles' filesep takeID '_allWalks.mat'];
+        load(allWalksPath)
+        
+        walkNum = 2; %which walk to play
+        w = allWalks{walkNum}; %'w' is a struct that contains all data relevant to walk#walkNum
+        
+        playLaserSkeleton(w,camParams,basePath)
     end%numConds
 end%numSubs

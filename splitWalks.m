@@ -59,7 +59,13 @@ if useEye(2), defaultSplit = [defaultSplit, lEyeData]; end
 
 
 defaultTranslateAndRotate = {'comXYZ'}';
-defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','patchTopLeft','patchTopRight','patchBottomLeft','patchBottomRight','headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
+% defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','patchTopLeft','patchTopRight','patchBottomLeft','patchBottomRight','headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
+if isToolboxAvailable('Robotics System Toolbox')
+    defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','patchTopLeft','patchTopRight','patchBottomLeft','patchBottomRight','headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
+else %without the Robotic's toolbox, you won't get any of those head vector or frustum variables
+    defaultRotateOnly = {'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
+end
+
 rEyeData = {'rGazeGroundIntersection','rEyeballCenterXYZ','rGazeXYZ'};
 lEyeData = {'lGazeGroundIntersection', 'lEyeballCenterXYZ','lGazeXYZ'};
 if useEye(1), defaultTranslateAndRotate = [defaultTranslateAndRotate, rEyeData]; end
@@ -70,8 +76,8 @@ p = inputParser();
 p.addParameter('Transfer',defaultTransfer);
 p.addParameter('Split',defaultSplit);
 p.addParameter('Rotate',defaultTranslateAndRotate);
-% p.addParameter('CorrectAlignmentFcn',@correctAlignmentError_opt);
-p.addParameter('CorrectAlignmentFcn',@correctAlignmentError_lookUpTable);
+p.addParameter('CorrectAlignmentFcn',@correctAlignmentError_opt);
+% p.addParameter('CorrectAlignmentFcn',@correctAlignmentError_lookUpTable);
 parse(p,varargin{:});
 
 data_to_transfer = p.Results.Transfer;
