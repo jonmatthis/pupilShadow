@@ -4,7 +4,50 @@ sesh = [];
 
 switch sessionID
     
-    
+    case '2019-05-30_KKL'
+        sesh.subID = 'KKL';
+        sesh.legLength = 950; %right ASIS to right Medial Maleolus
+        sesh.bodyMass = 84.1; %kg
+        sesh.height = 1776; %mm
+        
+        switch condID
+            
+            case 'Stomping'
+                sesh.shadowTakeName = 'take0004'; %shadow Take#
+                sesh.pupilExportDir = '000'; %name of the folder with the Pupil export data
+                
+                %%%NOTE THAT THESE FRAME NUMBERS CORRESPOND TO
+                %%%FRAME#'S*AFTER* RESAMPLING (i.e. let the code run until
+                %%%it gets past the point where 'synchedUnixTime' is
+                %%%defined, THEN pull the frame numbers <3 )
+                
+                sesh.vorFrames = 1324:3945; %frames where sub is VORing (Pupil Frames)
+                sesh.calibFrame =  sesh.vorFrames(1); %frame where sub is lookin good at the primary calibration marker real good
+                
+                sesh.walks = [10152 12214;
+                              12142 13961];
+                
+                sesh.trialType = {'Frisbee'; 'Frisbee'};
+                
+            case 'Fighting'
+                sesh.shadowTakeName = 'take0004'; %shadow Take#
+                sesh.pupilExportDir = '000'; %name of the folder with the Pupil export data
+                
+                %%%NOTE THAT THESE FRAME NUMBERS CORRESPOND TO
+                %%%FRAME#'S*AFTER* RESAMPLING (i.e. let the code run until
+                %%%it gets past the point where 'synchedUnixTime' is
+                %%%defined, THEN pull the frame numbers <3 )
+                
+                sesh.vorFrames = 1324:3945; %frames where sub is VORing (Pupil Frames)
+                sesh.calibFrame =  sesh.vorFrames(1); %frame where sub is lookin good at the primary calibration marker real good
+                
+                sesh.walks = [10152 12214;
+                    12142 13961];
+                
+                sesh.trialType = {'Frisbee'; 'Frisbee'};
+        end
+
+        
     case '2019-05-29_CalgaryWorkshopData'
         sesh.subID = 'JSM';
         sesh.legLength = 950; %right ASIS to right Medial Maleolus

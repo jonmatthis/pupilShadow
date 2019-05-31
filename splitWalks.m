@@ -48,8 +48,12 @@ rEyeData = {'rVorCalibErr'};
 if useEye(1), defaultTransfer = [defaultTransfer, rEyeData]; end
 if useEye(2), defaultTransfer = [defaultTransfer, lEyeData]; end
 
+if isToolboxAvailable('Robotics System Toolbox')
+    defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex','headGlobalQuat_wxyz', 'shortTermHeading_normPosX', 'shortTermHeading_normPosY', 'longTermHeading_normPosX', 'longTermHeading_normPosY', 'headGyroXYZ'};
+else
+    defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex','headGlobalQuat_wxyz', 'headGyroXYZ'};
+end
 
-defaultSplit = {'syncedUnixTime','gaze.norm_pos_x','gaze.norm_pos_y', 'worldFrameIndex','headGlobalQuat_wxyz', 'shortTermHeading_normPosX', 'shortTermHeading_normPosY', 'longTermHeading_normPosX', 'longTermHeading_normPosY', 'headGyroXYZ'};
 lEyeData = {'lEye.theta','lEye.phi','lEye.norm_pos_x',...
     'lEye.norm_pos_y','lEye.circle_3d_radius','lEye.blinks'};
 rEyeData = {'rEye.theta','rEye.phi','rEye.norm_pos_x',...
@@ -60,6 +64,7 @@ if useEye(2), defaultSplit = [defaultSplit, lEyeData]; end
 
 defaultTranslateAndRotate = {'comXYZ'}';
 % defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','patchTopLeft','patchTopRight','patchBottomLeft','patchBottomRight','headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
+
 if isToolboxAvailable('Robotics System Toolbox')
     defaultRotateOnly = {'headVecX_fr_xyz','headVecY_fr_xyz','headVecZ_fr_xyz','patchTopLeft','patchTopRight','patchBottomLeft','patchBottomRight','headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'headAccXYZ','chestAccXYZ','hipsAccXYZ'};%,'basisX','basisY','basisZ'};
 else %without the Robotic's toolbox, you won't get any of those head vector or frustum variables
