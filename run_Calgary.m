@@ -24,7 +24,7 @@ for subNum = 1;%1:4
         case 1
             sessionID = '2019-05-29_CalgaryWorkshopData';
         case 2
-            sessionID = '2019-05-30_CalgaryExtraSkeleton';
+            sessionID = '2019-05-30_KKL';
     end
     
     
@@ -35,9 +35,9 @@ for subNum = 1;%1:4
             case 1
                 takeID = 'Frisbee';
             case 2
-                takeID = 'LeafStomping';
+                takeID = 'Stomping';
             case 3
-                takeID = 'RandomPlaytime';
+                takeID = 'Fighting';
         end
         
         sessionPath = [dataPath filesep sessionID];
