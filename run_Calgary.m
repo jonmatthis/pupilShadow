@@ -2,34 +2,15 @@ close all
 clear all
 restoredefaultpath
 
-if isunix
-    [ret, name] = system('hostname');
-    name = name(1:end-1);
-    name = string(name);
-elseif ispc || ismac
-    name = getenv('computername');
-end
 
-switch name
-    case 'MATHISPCWIN10' %Jon's desktop PC
-        repoPath = 'D:\Dropbox\ResearchProjects\pupilShadow';
-        basePath = 'D:\Dropbox\ResearchProjects\OpticFlowProject\Data';
-        addpath(genpath('D:\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
-    case 'DESKTOP-L29LOMC' %Jon's windows laptop
-        repoPath ='C:\Users\jon\Dropbox\ResearchProjects\pupilShadow';
-        basePath = 'C:\Users\jon\Dropbox\ResearchProjects\OpticFlowProject\Data';
-        addpath(genpath('C:\Users\jon\Dropbox\ResearchProjects\toolboxes')); %add necessary toolboxes to path
-    case 'karl-G551JW'
-        assert(exist('/home/karl/mexopencv', 'dir')==7, 'Laser skeletons require MexOpenCV to function')
-        addpath('/home/karl/mexopencv/')
-        addpath('/home/karl/mexopencv/opencv_contrib/')
-        addpath(genpath('/home/karl/toolboxes/'));
-        repoPath = '/home/karl/pupilShadow/';
-        basePath = '/home/karl/Dropbox/OpticFlowProject/Data';
-        %          basePath = '/media/karl/44CD-7F85/OpticFlowProject/Data';
-end
+fullPath = mfilename('fullpath');
 
-addpath(genpath(repoPath))
+repoPath =  fullPath(1:end-12);
+dataPath = 'C:\Users\jon\Dropbox\ResearchProjects\OpticFlowProject\Data';
+toolboxPath = 'C:\Users\jon\Dropbox\ResearchProjects\toolboxes';
+
+addpath(genpath(toolboxPath)); %add necessary toolboxes to path
+addpath(genpath(repoPath)) %add this repository to the path
 %%
 
 %%
@@ -42,18 +23,24 @@ for subNum = 1;%1:4
     switch subNum
         case 1
             sessionID = '2019-05-29_CalgaryWorkshopData';
+        case 2
+            sessionID = '2019-05-30_CalgaryExtraSkeleton';
     end
     
     
     
-    for condNum = 1;%1:numConds
+    for takeNum = 1;%1:numConds
         
-        switch condNum
+        switch takeNum
             case 1
                 takeID = 'Frisbee';
+            case 2
+                takeID = 'LeafStomping';
+            case 3
+                takeID = 'RandomPlaytime';
         end
         
-        sessionPath = [basePath filesep sessionID];
+        sessionPath = [dataPath filesep sessionID];
         useEye = [1;1]; %use both eyes [true; true;] or just one? [false;  true] or [true; false]
         sessionFunction = @loadSessionInfo_Calgary; %name of the loadSessionInfo file we're going to use
         
@@ -92,6 +79,6 @@ for subNum = 1;%1:4
         walkNum = 2; %which walk to play
         w = allWalks{walkNum}; %'w' is a struct that contains all data relevant to walk#walkNum
         
-        playLaserSkeleton(w,camParams,basePath)
+        playLaserSkeleton(w,camParams,dataPath)
     end%numConds
 end%numSubs
